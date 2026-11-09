@@ -1,0 +1,8 @@
+{
+  "name": "@cms/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./margin": "./src/margin.ts"
+  }
+}
