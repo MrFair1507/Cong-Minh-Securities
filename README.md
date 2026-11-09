@@ -93,15 +93,17 @@ Không commit file `.env`. Secret key chỉ đặt trong `server/.env`, không b
 
 ## Lệnh hay dùng
 
-| Lệnh                        | Tác dụng                                |
-| --------------------------- | --------------------------------------- |
-| `yarn dev`                  | Chạy frontend và script giả lập giá     |
-| `yarn workspace client dev` | Chỉ chạy frontend                       |
-| `yarn build`                | Build frontend để triển khai            |
-| `yarn check`                | Kiểm tra lint và format bằng Biome      |
-| `yarn check:fix`            | Tự sửa lỗi lint và format               |
-| `yarn db:push`              | Đẩy migration lên Supabase              |
-| `yarn db:types`             | Sinh kiểu TypeScript từ schema database |
+| Lệnh                                                    | Tác dụng                                                 |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| `yarn dev`                                              | Chạy frontend và script giả lập giá                      |
+| `yarn workspace client dev`                             | Chỉ chạy frontend                                        |
+| `yarn workspace server start`                           | Chỉ chạy script giả lập giá                              |
+| `yarn workspace server start --trend=down --session=30` | Chế độ demo: giá giảm liên tục, mỗi 30 giây mở phiên mới |
+| `yarn build`                                            | Build frontend để triển khai                             |
+| `yarn check`                                            | Kiểm tra lint và format bằng Biome                       |
+| `yarn check:fix`                                        | Tự sửa lỗi lint và format                                |
+| `yarn db:push`                                          | Đẩy migration lên Supabase                               |
+| `yarn db:types`                                         | Sinh kiểu TypeScript từ schema database                  |
 
 ## Triển khai
 
