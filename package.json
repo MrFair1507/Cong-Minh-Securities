@@ -3,16 +3,16 @@
   "private": true,
   "workspaces": [
     "client",
-    "be",
+    "server",
     "shared"
   ],
   "scripts": {
-    "dev": "concurrently -n client,be -c cyan,magenta \"yarn workspace client dev\" \"yarn workspace be start\"",
+    "dev": "concurrently -n client,server -c cyan,magenta \"yarn workspace client dev\" \"yarn workspace server start\"",
     "build": "yarn workspace client build",
     "check": "biome check",
     "check:fix": "biome check --write",
-    "db:push": "yarn workspace be db:push",
-    "db:types": "yarn workspace be db:types"
+    "db:push": "yarn workspace server db:push",
+    "db:types": "yarn workspace server db:types"
   },
   "packageManager": "yarn@4.18.1+sha512.b2e1e7524f654f2749d32b4ebcb4622473cb5bcbc485df2007e12a154e50162a4d795526768bc5f5b8f81717bfd79deb2472813d86fb5ae2eb551fa9c872b08f",
   "devDependencies": {

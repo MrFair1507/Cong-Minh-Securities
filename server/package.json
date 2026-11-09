@@ -1,0 +1,20 @@
+{
+  "name": "server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx --env-file=.env simulator/index.ts",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > ../client/src/shared/api/database.types.ts"
+  },
+  "dependencies": {
+    "@cms/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "supabase": "^3.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

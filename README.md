@@ -24,7 +24,7 @@ Giới hạn phạm vi: chỉ có lệnh thị trường; ký quỹ chỉ cảnh
 | Phần                   | Công nghệ                                                                                                                                         |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Frontend (`client/`)   | Vite, React 19, TypeScript, TanStack Router / Query / Table / Form, Zod, shadcn/ui, Tailwind CSS v4, Zustand, i18next, lightweight-charts, Vitest |
-| Backend (`be/`)        | Supabase: Auth, PostgreSQL, Row Level Security, RPC (PL/pgSQL), Realtime; script Node giả lập giá                                                 |
+| Backend (`server/`)    | Supabase: Auth, PostgreSQL, Row Level Security, RPC (PL/pgSQL), Realtime; script Node giả lập giá                                                 |
 | Dùng chung (`shared/`) | Công thức ký quỹ dùng cho cả frontend và backend                                                                                                  |
 | Công cụ                | Yarn 4 workspaces, Biome (lint + format)                                                                                                          |
 | Triển khai             | Vercel (frontend), Supabase Cloud (backend)                                                                                                       |
@@ -39,7 +39,7 @@ Giới hạn phạm vi: chỉ có lệnh thị trường; ký quỹ chỉ cảnh
 │       ├── features/    # auth, market, trading, portfolio, margin
 │       ├── shared/      # UI, component, API client, tiện ích dùng chung
 │       └── i18n/        # Chuỗi giao diện tiếng Việt
-├── be/              # Supabase (migration, RLS, RPC) và script giả lập giá
+├── server/          # Supabase (migration, RLS, RPC) và script giả lập giá
 ├── shared/          # Gói @cms/shared: công thức ký quỹ
 ├── biome.json
 └── package.json     # Khai báo workspaces và script chung
@@ -66,7 +66,8 @@ Tạo file biến môi trường (xem mục dưới):
 
 ```bash
 cp client/.env.example client/.env.local
-# tạo be/.env và điền giá trị lấy từ Supabase Dashboard
+cp server/.env.example server/.env
+# điền giá trị lấy từ Supabase Dashboard vào cả hai file
 ```
 
 Tạo bảng trong database, sinh kiểu TypeScript, rồi chạy:
@@ -85,10 +86,10 @@ Lệnh `yarn dev` chạy cùng lúc frontend (Vite) và script giả lập giá.
 | ------------------- | ------------------------------- | ------------------------------------------------ |
 | `client/.env.local` | `VITE_SUPABASE_URL`             | URL project Supabase                             |
 | `client/.env.local` | `VITE_SUPABASE_PUBLISHABLE_KEY` | Publishable key (an toàn khi dùng ở trình duyệt) |
-| `be/.env`           | `SUPABASE_URL`                  | URL project Supabase                             |
-| `be/.env`           | `SUPABASE_SECRET_KEY`           | Secret key, chỉ dùng cho script giả lập          |
+| `server/.env`       | `SUPABASE_URL`                  | URL project Supabase                             |
+| `server/.env`       | `SUPABASE_SECRET_KEY`           | Secret key, chỉ dùng cho script giả lập          |
 
-Không commit file `.env`. Secret key chỉ đặt trong `be/.env`, không bao giờ đặt trong `client/`.
+Không commit file `.env`. Secret key chỉ đặt trong `server/.env`, không bao giờ đặt trong `client/`.
 
 ## Lệnh hay dùng
 

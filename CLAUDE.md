@@ -16,10 +16,10 @@
 
 ## Stack (đã chốt, không đổi)
 
-- Monorepo Yarn 4 workspaces (`nodeLinker: node-modules`): `client/`, `be/`, `shared/`. Biome thay ESLint + Prettier (nháy đơn, không chấm phẩy).
+- Monorepo Yarn 4 workspaces (`nodeLinker: node-modules`): `client/`, `server/`, `shared/`. Biome thay ESLint + Prettier (nháy đơn, không chấm phẩy).
 - client: Vite + React 19 + TypeScript 7; TanStack Router (file-based), Query, Table, Form + Zod; shadcn/ui + Tailwind v4; Zustand; i18next; lightweight-charts; Vitest. Alias `@/` → `client/src`.
-- be: Supabase (Auth, PostgreSQL, RLS, RPC PL/pgSQL `security definer`, Realtime cho `stocks` và `margin_calls`) + script Node giả lập giá (`be/simulator`, chạy bằng tsx, dùng secret key). Không có server tự viết.
-- shared: gói `@cms/shared`, file `margin.ts` (công thức ký quỹ dùng chung cho client và be), để nguyên `.ts`, không build. Import: `@cms/shared/margin`.
+- server: Supabase (Auth, PostgreSQL, RLS, RPC PL/pgSQL `security definer`, Realtime cho `stocks` và `margin_calls`) + script Node giả lập giá (`server/simulator`, chạy bằng tsx, dùng secret key). Không có API server tự viết: tên `server/` chỉ là nơi chứa schema Supabase và script giả lập.
+- shared: gói `@cms/shared`, file `margin.ts` (công thức ký quỹ dùng chung cho client và server), để nguyên `.ts`, không build. Import: `@cms/shared/margin`.
 - ERD 10 bảng: `profiles` (nối `auth.users`), `exchanges`, `stocks` (có `price`), `price_history`, `orders`, `holdings`, `cash_transactions`, `margin_accounts`, `margin_loans`, `margin_calls`.
 - Deploy: client lên Vercel (Root Directory = `client`, có `vercel.json` rewrite về `index.html`); Supabase Cloud gói Free, region Singapore.
 - Không dùng: Next.js, NestJS, mock toàn bộ, TanStack DB, AG Grid.
@@ -33,13 +33,14 @@
 - Xong shadcn/ui (bước 2.4): base radix, preset nova, font Geist (có subset tiếng Việt). Component nằm ở `client/src/shared/ui/`. shadcn 4.x dùng gói `cn` (thay clsx + tailwind-merge), component import thẳng `from "cn"`. Thêm component: `cd client` rồi `corepack yarn dlx shadcn@latest add <tên>`.
 - `biome.json` bật `css.parser.tailwindDirectives` để Biome đọc được `@apply`, `@theme`.
 - Git: nhánh `main`, đã có 2 commit đầu, chưa push. `.gitattributes` giữ LF cho Biome. `doc/` bị ignore.
-- CHƯA làm: thư mục `be/` (Bước 4 Supabase CLI + migration, Bước 5 simulator). Vì chưa có `be/` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
+- Đã đổi tên workspace `be` → `server` (tài liệu trong `doc/` vẫn ghi `be`).
+- Đã tạo khung `server/` (package.json, tsconfig.json, .env.example). CHƯA làm: Supabase CLI login/init/link + migration (Bước 4), simulator (Bước 5). Vì chưa có `server/simulator/index.ts` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
 - Trên máy này, `yarn` trong PowerShell đang trỏ tới Yarn 1.22 cài global qua npm. Dùng `corepack yarn ...`, hoặc chạy `corepack enable` (cần quyền admin) rồi gỡ Yarn 1 global.
-- Script gốc: `dev` (concurrently client + be), `build`, `check`, `check:fix`, `db:push`, `db:types`.
+- Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:
   - `client/.env.local`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
-  - `be/.env`: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`.
-  - Secret key chỉ nằm trong `be/.env`, không bao giờ đặt trong `client/`.
+  - `server/.env`: `SUPABASE_URL`, `SUPABASE_SECRET_KEY`.
+  - Secret key chỉ nằm trong `server/.env`, không bao giờ đặt trong `client/`.
 
 ## Cấu trúc thư mục client/src (dự kiến)
 

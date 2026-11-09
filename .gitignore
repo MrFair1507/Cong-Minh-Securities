@@ -10,4 +10,4 @@ dist/
 .DS_Store
 .tanstack/
 doc/
-be/supabase/.temp/
+server/supabase/.temp/
