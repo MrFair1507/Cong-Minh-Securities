@@ -30,7 +30,10 @@
 - Đã đổi tên: workspace `fe` → `client`, `investsim` → `cms`, `@investsim/shared` → `@cms/shared`.
 - Template Vite mới dùng oxlint: đã gỡ. TypeScript 7 không có `baseUrl`: alias chỉ khai báo bằng `paths`.
 - `client/src/shared/api/database.types.ts` hiện là file tạm (`Database = any`); `yarn db:types` sẽ ghi đè.
-- CHƯA làm: shadcn init (bước 2.4), thư mục `be/` (Bước 4 Supabase CLI + migration, Bước 5 simulator). Vì chưa có `be/` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
+- Xong shadcn/ui (bước 2.4): base radix, preset nova, font Geist (có subset tiếng Việt). Component nằm ở `client/src/shared/ui/`. shadcn 4.x dùng gói `cn` (thay clsx + tailwind-merge), component import thẳng `from "cn"`. Thêm component: `cd client` rồi `corepack yarn dlx shadcn@latest add <tên>`.
+- `biome.json` bật `css.parser.tailwindDirectives` để Biome đọc được `@apply`, `@theme`.
+- Git: nhánh `main`, đã có 2 commit đầu, chưa push. `.gitattributes` giữ LF cho Biome. `doc/` bị ignore.
+- CHƯA làm: thư mục `be/` (Bước 4 Supabase CLI + migration, Bước 5 simulator). Vì chưa có `be/` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
 - Trên máy này, `yarn` trong PowerShell đang trỏ tới Yarn 1.22 cài global qua npm. Dùng `corepack yarn ...`, hoặc chạy `corepack enable` (cần quyền admin) rồi gỡ Yarn 1 global.
 - Script gốc: `dev` (concurrently client + be), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:
