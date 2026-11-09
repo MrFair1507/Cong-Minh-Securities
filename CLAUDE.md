@@ -34,7 +34,8 @@
 - `biome.json` bật `css.parser.tailwindDirectives` để Biome đọc được `@apply`, `@theme`.
 - Git: nhánh `main`, đã có 2 commit đầu, chưa push. `.gitattributes` giữ LF cho Biome. `doc/` bị ignore.
 - Đã đổi tên workspace `be` → `server` (tài liệu trong `doc/` vẫn ghi `be`).
-- Đã tạo khung `server/` (package.json, tsconfig.json, .env.example). CHƯA làm: Supabase CLI login/init/link + migration (Bước 4), simulator (Bước 5). Vì chưa có `server/simulator/index.ts` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
+- Đã tạo khung `server/` (package.json, tsconfig.json, .env.example). Project Supabase "CMS" ở `ap-southeast-1` (Singapore); CLI đã login, `init` (`server/supabase/config.toml`, project_id "cms") và `link`. Chạy lệnh CLI trong `server/`: `corepack yarn supabase <lệnh>`. `.claude/settings.json` chặn Claude đọc/sửa file `.env`.
+- CHƯA làm: migration 10 bảng + seed (Bước 4.4), `db:types` (4.5), simulator (Bước 5). Vì chưa có `server/simulator/index.ts` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
 - Trên máy này, `yarn` trong PowerShell đang trỏ tới Yarn 1.22 cài global qua npm. Dùng `corepack yarn ...`, hoặc chạy `corepack enable` (cần quyền admin) rồi gỡ Yarn 1 global.
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:
