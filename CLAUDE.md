@@ -29,13 +29,14 @@
 - Xong Bước 1–3: Yarn 4.18.1 (đã ghim `packageManager`), Biome (`rules.preset "recommended"`), client chạy được `/market` hiện "Bảng giá", `shared/src/margin.ts` khung ban đầu.
 - Đã đổi tên: workspace `fe` → `client`, `investsim` → `cms`, `@investsim/shared` → `@cms/shared`.
 - Template Vite mới dùng oxlint: đã gỡ. TypeScript 7 không có `baseUrl`: alias chỉ khai báo bằng `paths`.
-- `client/src/shared/api/database.types.ts` hiện là file tạm (`Database = any`); `yarn db:types` sẽ ghi đè.
 - Xong shadcn/ui (bước 2.4): base radix, preset nova, font Geist (có subset tiếng Việt). Component nằm ở `client/src/shared/ui/`. shadcn 4.x dùng gói `cn` (thay clsx + tailwind-merge), component import thẳng `from "cn"`. Thêm component: `cd client` rồi `corepack yarn dlx shadcn@latest add <tên>`.
 - `biome.json` bật `css.parser.tailwindDirectives` để Biome đọc được `@apply`, `@theme`.
-- Git: nhánh `main`, đã có 2 commit đầu, chưa push. `.gitattributes` giữ LF cho Biome. `doc/` bị ignore.
+- Git: nhánh `main`, remote `origin` = GitHub `MrFair1507/Cong-Minh-Securities`. Claude không push được (không nhập được thông tin đăng nhập): Minh tự `git push`. `.gitattributes` giữ LF cho Biome. `doc/` bị ignore.
 - Đã đổi tên workspace `be` → `server` (tài liệu trong `doc/` vẫn ghi `be`).
 - Đã tạo khung `server/` (package.json, tsconfig.json, .env.example). Project Supabase "CMS" ở `ap-southeast-1` (Singapore); CLI đã login, `init` (`server/supabase/config.toml`, project_id "cms") và `link`. Chạy lệnh CLI trong `server/`: `corepack yarn supabase <lệnh>`. `.claude/settings.json` chặn Claude đọc/sửa file `.env`.
-- CHƯA làm: migration 10 bảng + seed (Bước 4.4), `db:types` (4.5), simulator (Bước 5). Vì chưa có `server/simulator/index.ts` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
+- Xong migration `init_schema` (10 bảng, ràng buộc, trigger tạo profile 100 triệu, RLS chỉ đọc, Realtime `stocks` + `margin_calls`) và `seed.sql` (2 sàn, 30 mã, 60 phiên nến), đã push lên cloud; `database.types.ts` đã sinh thật. Ghi dữ liệu nghiệp vụ chỉ qua RPC (tuần 2). Ngưỡng ký quỹ lưu ở `margin_accounts` (0.5 / 0.4 / 0.3), `shared/margin.ts` nhận ngưỡng qua tham số.
+- Supabase CLI 3.0 mặc định nhắm DB cục bộ: lệnh tới cloud phải có `--remote` (script `db:push`, `db:types` đã thêm). Máy không có Docker. Migration mới: `corepack yarn supabase migration new <tên>` trong `server/`, không sửa migration đã push.
+- CHƯA làm: simulator (Bước 5). Vì chưa có `server/simulator/index.ts` nên `yarn dev` ở gốc chưa chạy; tạm dùng `yarn workspace client dev`.
 - Trên máy này, `yarn` trong PowerShell đang trỏ tới Yarn 1.22 cài global qua npm. Dùng `corepack yarn ...`, hoặc chạy `corepack enable` (cần quyền admin) rồi gỡ Yarn 1 global.
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:

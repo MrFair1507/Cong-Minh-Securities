@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "start": "tsx --env-file=.env simulator/index.ts",
-    "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --linked > ../client/src/shared/api/database.types.ts"
+    "db:push": "supabase db push --remote --include-seed",
+    "db:types": "supabase gen types typescript --remote > ../client/src/shared/api/database.types.ts"
   },
   "dependencies": {
     "@cms/shared": "workspace:*",
