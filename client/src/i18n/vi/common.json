@@ -1,0 +1,60 @@
+{
+  "appName": "CMS",
+  "nav": {
+    "label": "Điều hướng chính",
+    "market": "Bảng giá",
+    "orders": "Lịch sử lệnh",
+    "portfolio": "Danh mục",
+    "cash": "Dòng tiền",
+    "margin": "Ký quỹ",
+    "profile": "Hồ sơ"
+  },
+  "header": {
+    "search": "Tìm mã chứng khoán…",
+    "searchLabel": "Tìm mã chứng khoán",
+    "cash": "Tiền mặt",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "accountMenu": "Mở menu tài khoản"
+  },
+  "pages": {
+    "market": {
+      "title": "Bảng giá",
+      "description": "30 mã HOSE/HNX · giá do bộ giả lập sinh ra, không phải dữ liệu thật"
+    },
+    "stock": {
+      "title": "Chi tiết mã",
+      "description": "Giá, biên độ và biểu đồ nến của mã"
+    },
+    "orders": {
+      "title": "Lịch sử lệnh",
+      "description": "Các lệnh mua bán đã khớp"
+    },
+    "portfolio": {
+      "title": "Danh mục",
+      "description": "Cổ phiếu đang nắm giữ và lãi lỗ tạm tính"
+    },
+    "cash": {
+      "title": "Lịch sử dòng tiền",
+      "description": "Mọi khoản tiền vào, ra tài khoản"
+    },
+    "margin": {
+      "title": "Tài khoản ký quỹ",
+      "description": "Tỷ lệ ký quỹ, dư nợ và các khoản vay"
+    },
+    "profile": {
+      "title": "Hồ sơ cá nhân",
+      "description": "Thông tin tài khoản của bạn"
+    },
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Đăng nhập để giao dịch với 100 triệu vốn ảo"
+    },
+    "register": {
+      "title": "Đăng ký",
+      "description": "Tạo tài khoản, nhận ngay 100 triệu vốn ảo"
+    }
+  },
+  "placeholder": "Trang này đang được xây dựng."
+}

@@ -10,43 +10,168 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MarketRouteImport } from './routes/market'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as AppAuthedRouteImport } from './routes/_app/_authed'
+import { Route as AppMarketRouteImport } from './routes/_app/market'
+import { Route as GuestLoginRouteImport } from './routes/_guest/login'
+import { Route as GuestRegisterRouteImport } from './routes/_guest/register'
+import { Route as AppAuthedCashRouteImport } from './routes/_app/_authed/cash'
+import { Route as AppAuthedMarginRouteImport } from './routes/_app/_authed/margin'
+import { Route as AppAuthedOrdersRouteImport } from './routes/_app/_authed/orders'
+import { Route as AppAuthedPortfolioRouteImport } from './routes/_app/_authed/portfolio'
+import { Route as AppAuthedProfileRouteImport } from './routes/_app/_authed/profile'
+import { Route as AppAuthedStocksSymbolRouteImport } from './routes/_app/_authed/stocks.$symbol'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketRoute = MarketRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAuthedRoute = AppAuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketRoute = AppMarketRouteImport.update({
   id: '/market',
   path: '/market',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
+} as any)
+const GuestLoginRoute = GuestLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestRegisterRoute = GuestRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => GuestRoute,
+} as any)
+const AppAuthedCashRoute = AppAuthedCashRouteImport.update({
+  id: '/cash',
+  path: '/cash',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedMarginRoute = AppAuthedMarginRouteImport.update({
+  id: '/margin',
+  path: '/margin',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedOrdersRoute = AppAuthedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedPortfolioRoute = AppAuthedPortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedProfileRoute = AppAuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppAuthedRoute,
+} as any)
+const AppAuthedStocksSymbolRoute = AppAuthedStocksSymbolRouteImport.update({
+  id: '/stocks/$symbol',
+  path: '/stocks/$symbol',
+  getParentRoute: () => AppAuthedRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/market': typeof MarketRoute
+  '/market': typeof AppMarketRoute
+  '/login': typeof GuestLoginRoute
+  '/register': typeof GuestRegisterRoute
+  '/cash': typeof AppAuthedCashRoute
+  '/margin': typeof AppAuthedMarginRoute
+  '/orders': typeof AppAuthedOrdersRoute
+  '/portfolio': typeof AppAuthedPortfolioRoute
+  '/profile': typeof AppAuthedProfileRoute
+  '/stocks/$symbol': typeof AppAuthedStocksSymbolRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/market': typeof MarketRoute
+  '/market': typeof AppMarketRoute
+  '/login': typeof GuestLoginRoute
+  '/register': typeof GuestRegisterRoute
+  '/cash': typeof AppAuthedCashRoute
+  '/margin': typeof AppAuthedMarginRoute
+  '/orders': typeof AppAuthedOrdersRoute
+  '/portfolio': typeof AppAuthedPortfolioRoute
+  '/profile': typeof AppAuthedProfileRoute
+  '/stocks/$symbol': typeof AppAuthedStocksSymbolRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/market': typeof MarketRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_guest': typeof GuestRouteWithChildren
+  '/_app/_authed': typeof AppAuthedRouteWithChildren
+  '/_app/market': typeof AppMarketRoute
+  '/_guest/login': typeof GuestLoginRoute
+  '/_guest/register': typeof GuestRegisterRoute
+  '/_app/_authed/cash': typeof AppAuthedCashRoute
+  '/_app/_authed/margin': typeof AppAuthedMarginRoute
+  '/_app/_authed/orders': typeof AppAuthedOrdersRoute
+  '/_app/_authed/portfolio': typeof AppAuthedPortfolioRoute
+  '/_app/_authed/profile': typeof AppAuthedProfileRoute
+  '/_app/_authed/stocks/$symbol': typeof AppAuthedStocksSymbolRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/market'
+  fullPaths:
+    | '/'
+    | '/market'
+    | '/login'
+    | '/register'
+    | '/cash'
+    | '/margin'
+    | '/orders'
+    | '/portfolio'
+    | '/profile'
+    | '/stocks/$symbol'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/market'
-  id: '__root__' | '/' | '/market'
+  to:
+    | '/'
+    | '/market'
+    | '/login'
+    | '/register'
+    | '/cash'
+    | '/margin'
+    | '/orders'
+    | '/portfolio'
+    | '/profile'
+    | '/stocks/$symbol'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_guest'
+    | '/_app/_authed'
+    | '/_app/market'
+    | '/_guest/login'
+    | '/_guest/register'
+    | '/_app/_authed/cash'
+    | '/_app/_authed/margin'
+    | '/_app/_authed/orders'
+    | '/_app/_authed/portfolio'
+    | '/_app/_authed/profile'
+    | '/_app/_authed/stocks/$symbol'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MarketRoute: typeof MarketRoute
+  AppRoute: typeof AppRouteWithChildren
+  GuestRoute: typeof GuestRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +183,143 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/market': {
-      id: '/market'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/_authed': {
+      id: '/_app/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppAuthedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/market': {
+      id: '/_app/market'
       path: '/market'
       fullPath: '/market'
-      preLoaderRoute: typeof MarketRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppMarketRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_guest/login': {
+      id: '/_guest/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/register': {
+      id: '/_guest/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof GuestRegisterRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_app/_authed/cash': {
+      id: '/_app/_authed/cash'
+      path: '/cash'
+      fullPath: '/cash'
+      preLoaderRoute: typeof AppAuthedCashRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/_app/_authed/margin': {
+      id: '/_app/_authed/margin'
+      path: '/margin'
+      fullPath: '/margin'
+      preLoaderRoute: typeof AppAuthedMarginRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/_app/_authed/orders': {
+      id: '/_app/_authed/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AppAuthedOrdersRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/_app/_authed/portfolio': {
+      id: '/_app/_authed/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof AppAuthedPortfolioRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/_app/_authed/profile': {
+      id: '/_app/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppAuthedProfileRouteImport
+      parentRoute: typeof AppAuthedRoute
+    }
+    '/_app/_authed/stocks/$symbol': {
+      id: '/_app/_authed/stocks/$symbol'
+      path: '/stocks/$symbol'
+      fullPath: '/stocks/$symbol'
+      preLoaderRoute: typeof AppAuthedStocksSymbolRouteImport
+      parentRoute: typeof AppAuthedRoute
     }
   }
 }
 
+interface AppAuthedRouteChildren {
+  AppAuthedCashRoute: typeof AppAuthedCashRoute
+  AppAuthedMarginRoute: typeof AppAuthedMarginRoute
+  AppAuthedOrdersRoute: typeof AppAuthedOrdersRoute
+  AppAuthedPortfolioRoute: typeof AppAuthedPortfolioRoute
+  AppAuthedProfileRoute: typeof AppAuthedProfileRoute
+  AppAuthedStocksSymbolRoute: typeof AppAuthedStocksSymbolRoute
+}
+
+const AppAuthedRouteChildren: AppAuthedRouteChildren = {
+  AppAuthedCashRoute: AppAuthedCashRoute,
+  AppAuthedMarginRoute: AppAuthedMarginRoute,
+  AppAuthedOrdersRoute: AppAuthedOrdersRoute,
+  AppAuthedPortfolioRoute: AppAuthedPortfolioRoute,
+  AppAuthedProfileRoute: AppAuthedProfileRoute,
+  AppAuthedStocksSymbolRoute: AppAuthedStocksSymbolRoute,
+}
+
+const AppAuthedRouteWithChildren = AppAuthedRoute._addFileChildren(
+  AppAuthedRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAuthedRoute: typeof AppAuthedRouteWithChildren
+  AppMarketRoute: typeof AppMarketRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAuthedRoute: AppAuthedRouteWithChildren,
+  AppMarketRoute: AppMarketRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+interface GuestRouteChildren {
+  GuestLoginRoute: typeof GuestLoginRoute
+  GuestRegisterRoute: typeof GuestRegisterRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestLoginRoute: GuestLoginRoute,
+  GuestRegisterRoute: GuestRegisterRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MarketRoute: MarketRoute,
+  AppRoute: AppRouteWithChildren,
+  GuestRoute: GuestRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

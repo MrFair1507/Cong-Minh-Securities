@@ -11,3 +11,6 @@ dist/
 .tanstack/
 doc/
 server/supabase/.temp/
+
+# Claude Code: cau hinh ca nhan
+.claude/settings.local.json
