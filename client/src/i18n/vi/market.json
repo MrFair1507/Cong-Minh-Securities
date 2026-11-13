@@ -35,5 +35,41 @@
   },
   "sortHint": "Bấm để sắp xếp",
   "empty": "Không có mã nào khớp với bộ lọc",
-  "footer": "Giá × 1.000 VNĐ · Khối lượng × 10 · Dữ liệu do bộ giả lập sinh ra, không phải giá thật"
+  "footer": "Giá × 1.000 VNĐ · Khối lượng × 10 · Dữ liệu do bộ giả lập sinh ra, không phải giá thật",
+  "stock": {
+    "back": "Bảng giá",
+    "buy": "Mua",
+    "sell": "Bán",
+    "tradeSoon": "Chức năng đặt lệnh đang được xây dựng",
+    "chartTitle": "Biểu đồ nến · khung ngày",
+    "rangeLabel": "Khoảng thời gian",
+    "ranges": {
+      "1M": "1T",
+      "3M": "3T",
+      "6M": "6T",
+      "1Y": "1N"
+    },
+    "info": {
+      "title": "Thông tin giao dịch",
+      "ref": "Tham chiếu",
+      "ceiling": "Trần",
+      "floor": "Sàn",
+      "open": "Mở cửa",
+      "high": "Cao nhất",
+      "low": "Thấp nhất",
+      "totalVolume": "Tổng khối lượng",
+      "tickLot": "Bước giá · Lô",
+      "tickLotValue": "{{tick}} · {{lot}} CP"
+    },
+    "holding": {
+      "title": "Bạn đang nắm giữ",
+      "summary": "{{quantity}} CP · giá vốn {{cost}}",
+      "profit": "Lãi/lỗ tạm tính {{amount}} ({{percent}})"
+    },
+    "notFound": {
+      "title": "Không tìm thấy mã chứng khoán",
+      "description": "Mã này không có trong danh sách 30 mã của bảng giá mô phỏng.",
+      "back": "Về bảng giá"
+    }
+  }
 }

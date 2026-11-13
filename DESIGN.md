@@ -38,3 +38,4 @@ Quyết định thiết kế đã chốt cho giao diện CMS. Màn mới làm th
 - Khung app + trang tạm cho mọi route (bước 1, 09/11).
 - Đăng ký 4 bước có eKYC mô phỏng (11/11): ảnh chỉ xử lý trên trình duyệt, số giấy tờ do hệ thống sinh với tiền tố 999, không nhận diện khuôn mặt.
 - Bảng giá đủ cột + Realtime (12/11).
+- Chi tiết mã `/stocks/$symbol` (13/11, frame 04): đầu trang (mã + sàn + tên, giá lớn nháy khi đổi, +/- và %), nút Bán/Mua (chờ tuần 2). Lưới `1fr | 320px`: trái biểu đồ nến ngày + cột KL (cao 420px, chọn 1T/3T/6T/1N); phải thẻ Thông tin giao dịch và thẻ Đang nắm giữ (nền muted, chỉ hiện khi có cổ phiếu). Không làm sổ lệnh riêng ở trang này (đã có trên bảng giá).

@@ -35,5 +35,41 @@
   },
   "sortHint": "Click to sort",
   "empty": "No symbols match the filter",
-  "footer": "Price × 1,000 VND · Volume × 10 · Simulated data, not real prices"
+  "footer": "Price × 1,000 VND · Volume × 10 · Simulated data, not real prices",
+  "stock": {
+    "back": "Price board",
+    "buy": "Buy",
+    "sell": "Sell",
+    "tradeSoon": "Order placement is under construction",
+    "chartTitle": "Candlestick chart · daily",
+    "rangeLabel": "Time range",
+    "ranges": {
+      "1M": "1M",
+      "3M": "3M",
+      "6M": "6M",
+      "1Y": "1Y"
+    },
+    "info": {
+      "title": "Trading information",
+      "ref": "Reference",
+      "ceiling": "Ceiling",
+      "floor": "Floor",
+      "open": "Open",
+      "high": "High",
+      "low": "Low",
+      "totalVolume": "Total volume",
+      "tickLot": "Tick size · Lot",
+      "tickLotValue": "{{tick}} · {{lot}} shares"
+    },
+    "holding": {
+      "title": "You are holding",
+      "summary": "{{quantity}} shares · avg cost {{cost}}",
+      "profit": "Unrealized P/L {{amount}} ({{percent}})"
+    },
+    "notFound": {
+      "title": "Symbol not found",
+      "description": "This symbol is not among the 30 symbols on the simulated price board.",
+      "back": "Back to price board"
+    }
+  }
 }

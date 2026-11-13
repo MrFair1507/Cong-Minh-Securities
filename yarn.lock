@@ -3288,6 +3288,7 @@ __metadata:
     class-variance-authority: "npm:^0.7.1"
     cn: "npm:^0.5.2"
     i18next: "npm:^27.0.1"
+    lightweight-charts: "npm:^5.3.0"
     lucide-react: "npm:^1.70.0"
     next-themes: "npm:^0.4.6"
     radix-ui: "npm:^1.8.1"
@@ -3761,6 +3762,13 @@ __metadata:
   version: 3.1.3
   resolution: "exponential-backoff@npm:3.1.3"
   checksum: 10c0/77e3ae682b7b1f4972f563c6dbcd2b0d54ac679e62d5d32f3e5085feba20483cf28bd505543f520e287a56d4d55a28d7874299941faf637e779a1aa5994d1267
+  languageName: node
+  linkType: hard
+
+"fancy-canvas@npm:2.1.0":
+  version: 2.1.0
+  resolution: "fancy-canvas@npm:2.1.0"
+  checksum: 10c0/2b863b1548214ac793a5104154be389dbca6847c53c8bda88e4309f14bcdb498f4da21e368b573f3ab5f458d3b47c3f0ef731a7b90c8264b23c1cf0bfc9d1da3
   languageName: node
   linkType: hard
 
@@ -4365,6 +4373,15 @@ __metadata:
     lightningcss-win32-x64-msvc:
       optional: true
   checksum: 10c0/ce1f8279fbae636dbf37fa6e7385d5f98ed881d72af3362f24afbd4685e19c1fcdfecf17e5dd77f2ebee3d0c23ade276230d85842d07292229a2cffba8ff20a3
+  languageName: node
+  linkType: hard
+
+"lightweight-charts@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "lightweight-charts@npm:5.3.0"
+  dependencies:
+    fancy-canvas: "npm:2.1.0"
+  checksum: 10c0/55a0320abc308d2adc1c76e0826121d59dc2a51f27ba776686ba0923d1f88169a7b04f5d39c89e135c3aadbf421e58cfa407727dc329ee7794b275ff34e82c16
   languageName: node
   linkType: hard
 
