@@ -7,7 +7,7 @@ export const profileQueryOptions = (userId: string) =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, cash_balance')
+        .select('id, full_name, cash_balance, account_no, kyc_verified_at')
         .eq('id', userId)
         .single()
       if (error) throw error

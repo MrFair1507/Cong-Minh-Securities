@@ -1,0 +1,72 @@
+{
+  "appName": "CMS",
+  "language": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "market": "Market",
+    "orders": "Orders",
+    "portfolio": "Portfolio",
+    "cash": "Cash flow",
+    "margin": "Margin",
+    "profile": "Profile"
+  },
+  "header": {
+    "search": "Search symbol…",
+    "searchLabel": "Search symbol",
+    "cash": "Cash",
+    "login": "Log in",
+    "register": "Sign up",
+    "logout": "Log out",
+    "accountMenu": "Open account menu",
+    "preferences": "Appearance and language"
+  },
+  "pages": {
+    "market": {
+      "title": "Price board",
+      "description": "30 HOSE/HNX symbols · prices come from a simulator, not real data"
+    },
+    "stock": {
+      "title": "Symbol details",
+      "description": "Price, limits and candlestick chart"
+    },
+    "orders": {
+      "title": "Order history",
+      "description": "Filled buy and sell orders"
+    },
+    "portfolio": {
+      "title": "Portfolio",
+      "description": "Holdings and unrealized profit/loss"
+    },
+    "cash": {
+      "title": "Cash flow",
+      "description": "All money in and out of the account"
+    },
+    "margin": {
+      "title": "Margin account",
+      "description": "Margin ratio, debt and loans"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Your account information"
+    },
+    "login": {
+      "title": "Log in",
+      "description": "Log in to trade with 100 million in virtual capital"
+    },
+    "register": {
+      "title": "Sign up",
+      "description": "Create an account and get 100 million in virtual capital"
+    }
+  },
+  "placeholder": "This page is under construction."
+}

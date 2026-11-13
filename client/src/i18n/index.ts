@@ -1,19 +1,51 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
-import common from './vi/common.json'
+import enAuth from './en/auth.json'
+import enCommon from './en/common.json'
+import enMarket from './en/market.json'
+import viAuth from './vi/auth.json'
+import viCommon from './vi/common.json'
+import viMarket from './vi/market.json'
 
-// Chỉ tiếng Việt, nhưng mọi chữ trên giao diện vẫn đi qua key để sau này thêm ngôn ngữ dễ.
 export const defaultNS = 'common'
-export const resources = {
-  vi: { common },
-} as const
+export const languages = ['vi', 'en'] as const
+export type Language = (typeof languages)[number]
+
+const vi = { common: viCommon, auth: viAuth, market: viMarket }
+// satisfies: file tiếng Anh thiếu key nào so với tiếng Việt thì TypeScript báo lỗi
+const en = {
+  common: enCommon,
+  auth: enAuth,
+  market: enMarket,
+} satisfies typeof vi
+
+export const resources = { vi, en } as const
+
+const STORAGE_KEY = 'cms.lang'
+
+function savedLanguage(): Language {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'en' ? 'en' : 'vi'
+  } catch {
+    return 'vi'
+  }
+}
 
 i18n.use(initReactI18next).init({
-  lng: 'vi',
+  lng: savedLanguage(),
   fallbackLng: 'vi',
+  supportedLngs: languages,
   defaultNS,
   resources,
-  interpolation: { escapeValue: false }, // React đã tự escape
+  interpolation: { escapeValue: false },
+})
+
+document.documentElement.lang = i18n.language
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng
+  try {
+    localStorage.setItem(STORAGE_KEY, lng)
+  } catch {}
 })
 
 export default i18n

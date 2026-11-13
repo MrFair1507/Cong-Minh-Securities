@@ -1,0 +1,39 @@
+{
+  "title": "Bảng giá",
+  "toolbar": {
+    "search": "Tìm mã CK",
+    "searchLabel": "Tìm mã chứng khoán trên bảng giá",
+    "exchangeLabel": "Lọc theo sàn",
+    "all": "Tất cả"
+  },
+  "groups": {
+    "bid": "Bên mua",
+    "match": "Khớp lệnh",
+    "ask": "Bên bán",
+    "foreign": "NĐTNN"
+  },
+  "columns": {
+    "ref": "TC",
+    "ceiling": "Trần",
+    "floor": "Sàn",
+    "price1": "Giá 1",
+    "price2": "Giá 2",
+    "price3": "Giá 3",
+    "volume1": "KL 1",
+    "volume2": "KL 2",
+    "volume3": "KL 3",
+    "symbol": "Mã CK",
+    "price": "Giá",
+    "volume": "KL",
+    "change": "+/-",
+    "totalVolume": "Tổng KL",
+    "average": "TB",
+    "high": "Cao",
+    "low": "Thấp",
+    "room": "Room",
+    "foreignRatio": "%"
+  },
+  "sortHint": "Bấm để sắp xếp",
+  "empty": "Không có mã nào khớp với bộ lọc",
+  "footer": "Giá × 1.000 VNĐ · Khối lượng × 10 · Dữ liệu do bộ giả lập sinh ra, không phải giá thật"
+}

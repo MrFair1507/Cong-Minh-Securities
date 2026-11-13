@@ -6,7 +6,6 @@ type PageHeaderProps = {
   actions?: ReactNode
 }
 
-// Tiêu đề trang theo khối "Page heading" trong Figma: tiêu đề 24px, mô tả 14px xám, nút bên phải
 export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
     <div className="flex items-center justify-between gap-4">

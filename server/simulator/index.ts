@@ -7,7 +7,10 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../../client/src/shared/api/database.types'
 import { checkMarginCalls } from './margin-watch'
 import {
+  buildOrderBook,
+  nextForeignRoom,
   nextPrice,
+  type OrderBook,
   pickRandom,
   priceLimits,
   randomChange,
@@ -26,7 +29,13 @@ type SimStock = {
   ceiling: number
   floor: number
   price: number
-  volume: number
+  volume: number // tổng KL trong phiên
+  lastVolume: number // KL khớp gần nhất
+  high: number
+  low: number
+  totalValue: number // tổng giá trị khớp, để tính giá TB
+  book: OrderBook
+  foreignRoom: number
 }
 
 type Candle = {
@@ -86,7 +95,7 @@ async function loadStocks(): Promise<SimStock[]> {
   const { data, error } = await supabase
     .from('stocks')
     .select(
-      'id, symbol, ref_price, ceiling_price, floor_price, price, volume, exchanges(price_band)',
+      'id, symbol, ref_price, ceiling_price, floor_price, price, volume, last_volume, high_price, low_price, total_value, bid_prices, bid_volumes, ask_prices, ask_volumes, foreign_room, exchanges(price_band)',
     )
     .order('id')
   if (error) throw error
@@ -99,6 +108,17 @@ async function loadStocks(): Promise<SimStock[]> {
     floor: s.floor_price,
     price: s.price,
     volume: s.volume,
+    lastVolume: s.last_volume,
+    high: s.high_price ?? s.price,
+    low: s.low_price ?? s.price,
+    totalValue: s.total_value,
+    book: {
+      bidPrices: s.bid_prices,
+      bidVolumes: s.bid_volumes,
+      askPrices: s.ask_prices,
+      askVolumes: s.ask_volumes,
+    },
+    foreignRoom: s.foreign_room,
   }))
 }
 
@@ -131,6 +151,15 @@ async function saveStocks(list: SimStock[]): Promise<void> {
           floor_price: s.floor,
           price: s.price,
           volume: s.volume,
+          last_volume: s.lastVolume,
+          high_price: s.high,
+          low_price: s.low,
+          total_value: s.totalValue,
+          bid_prices: s.book.bidPrices,
+          bid_volumes: s.book.bidVolumes,
+          ask_prices: s.book.askPrices,
+          ask_volumes: s.book.askVolumes,
+          foreign_room: s.foreignRoom,
         })
         .eq('id', s.id),
     ),
@@ -161,6 +190,11 @@ async function startSession(date: string, newDay: boolean): Promise<void> {
     s.ceiling = limits.ceiling
     s.floor = limits.floor
     s.volume = 0
+    s.lastVolume = 0
+    s.high = s.price
+    s.low = s.price
+    s.totalValue = 0
+    s.book = buildOrderBook(s.price, s) // dựng sổ lệnh cho mọi mã để bảng giá không trống
     if (newDay) {
       candles.set(s.id, {
         open: s.price,
@@ -190,6 +224,12 @@ async function tick(): Promise<void> {
     s.price = nextPrice(s.price, change, s)
     const volume = randomVolume()
     s.volume += volume
+    s.lastVolume = volume
+    s.totalValue += s.price * volume
+    s.high = Math.max(s.high, s.price)
+    s.low = Math.min(s.low, s.price)
+    s.book = buildOrderBook(s.price, s)
+    s.foreignRoom = nextForeignRoom(s.foreignRoom)
 
     const c = candles.get(s.id)
     if (c) {

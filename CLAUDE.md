@@ -5,7 +5,7 @@
 ## Bối cảnh
 
 - CMS (Cong Minh Securities): web mô phỏng đầu tư chứng khoán có ký quỹ. Vốn ảo 100 triệu VND, giá do script Node giả lập. Kiến thức ký quỹ chỉ lấy từ nguồn công khai (QĐ 87/QĐ-UBCK).
-- Phạm vi: 7 nhóm chức năng, 9 trang, 5 hộp thoại. Chỉ lệnh thị trường. Ký quỹ chỉ cảnh báo, không tự bán giải chấp. Chỉ tiếng Việt (vẫn giữ key i18n), chỉ desktop.
+- Phạm vi: 7 nhóm chức năng, 9 trang, 5 hộp thoại. Chỉ lệnh thị trường. Ký quỹ chỉ cảnh báo, không tự bán giải chấp. Vie/EN, chỉ desktop.
 - 9 trang: `/login`, `/register`, `/market?exchange=&sort=&q=` (khách xem được), `/stocks/$symbol`, `/orders?side=&symbol=`, `/portfolio`, `/cash?type=`, `/margin`, `/profile`.
 - 5 hộp thoại: Đặt lệnh (có nhánh vay), Xác nhận lệnh, Mở tài khoản ký quỹ, Trả nợ ký quỹ, Cảnh báo ký quỹ (toast/popup).
 - Luồng demo: đăng nhập → xem giá → đặt lệnh có vay ký quỹ → xem danh mục → giá giảm → nhận cảnh báo → trả nợ.
@@ -39,7 +39,10 @@
 - Xong simulator (Bước 5), đã chạy thử với DB cloud: `server/simulator/index.ts` (vòng lặp 3 giây, mỗi nhịp đổi 5 mã ngẫu nhiên, cập nhật `stocks` + nến hôm nay, sang ngày mới theo giờ VN thì tham chiếu = giá đóng cửa, tính lại trần/sàn), `price.ts` (hàm thuần: làm tròn bước giá, trần/sàn, biến động), `margin-watch.ts` (dùng `@cms/shared/margin` tạo/đóng `margin_calls`). Cờ demo: `--trend=down|up` (mọi mã ±1,5% mỗi nhịp), `--session=<giây>` (phiên nhanh để giảm quá biên độ một phiên). Kiểu DB import type-only từ `client/src/shared/api/database.types.ts`. Typecheck server: `corepack yarn workspace server tsc -p .`. `yarn dev` ở gốc đã chạy được.
 - Thiết kế: Figma "CMS" của Minh (fileKey `zH4VPGRZBWQM4VF7go2IA7`, trang `InvestSim`, frame 01–14b cho 9 trang + 5 hộp thoại + component). Đọc qua Figma MCP. Quyết định thiết kế ghi ở `DESIGN.md` (gốc repo): menu ngang trên header thay sidebar, bỏ nút VI/EN và chuông. Skill `evon:ui-ux` cài qua `.claude/settings.local.json` (không commit).
 - Xong bước 1 tuần 1 (khung app + i18n): token zinc + màu giá trong `index.css`; TanStack Query (`shared/api/queryClient.ts`), i18next (`i18n/index.ts`, `vi/common.json`, kiểu key ở `types/i18next.d.ts`); router context `{ queryClient }` + `session` lấy ở `__root` beforeLoad, `onAuthStateChange` gọi `router.invalidate()`; route `_app` (header) → `market`, `_app/_authed` (guard → `/login?redirect=`) → orders, portfolio, cash, margin, profile, `stocks/$symbol`; `_guest` → login (validateSearch Zod), register. Các trang này đang là `PlaceholderPage`. `shared/components`: AppHeader, Logo, PageHeader, PlaceholderPage; `shared/lib/format.ts`; `features/auth/api/profile.ts`.
-- Tiếp theo (tuần 1): auth (form login/register theo frame 01, 02), bảng giá `/market` với Realtime (frame 03), chi tiết mã `/stocks/$symbol` (frame 04, lightweight-charts).
+- Xong đăng ký 4 bước (eKYC mô phỏng, kế hoạch `~/.claude/plans/b-c-ti-p-theo-l-snoopy-dewdrop.md`): migration `kyc_profile` đã push (cột KYC, `account_no` CMS000xxx, check `id_number ~ '^999\d{9}$'`, trigger đọc metadata), wizard ở `features/auth/components/register/`, `features/auth/lib/mockIdentity.ts`, route `/register?completed=`. Supabase cloud phải tắt "Confirm email". Còn: kiểm thử thủ công.
+- Xong bảng giá `/market` (12/11, kế hoạch `~/.claude/plans/tingly-sparking-minsky.md`): migration `market_board` (stocks thêm `last_volume`, `high_price`/`low_price` cho phép null, `total_value`, `bid_/ask_prices`/`_volumes` dạng mảng 3 bước, `foreign_limit`/`foreign_room`); simulator dựng sổ lệnh (`buildOrderBook` trong `price.ts`). Client: `features/market/` (api `stocksQueryOptions` + `BoardStock`, `useStocksRealtime` ghi thẳng vào cache Query, không dùng Zustand; `lib/board.ts` tô màu/lọc; `boardColumns.tsx` 25 cột 2 tầng; `BoardValue` nháy ô). TanStack Table là **v9** (`useTable` + `tableFeatures`, gộp cột bằng `column.columns([...])`). Search params `exchange`, `q`, `sort` (`-volume`...). Lệnh `db push`/`db query` tới cloud cần `--yes` khi Claude chạy, đọc dùng `--read-only`. 13/11: Realtime đã kiểm tra bằng script với publishable key (anon nhận đủ UPDATE); giao diện chưa xem trên trình duyệt. Simulator chạy trên máy, không tự chạy trên cloud: giá chỉ nhảy khi `yarn dev` / `yarn workspace server start` đang chạy.
+- Xong theme sáng/tối/hệ thống (12/11): `next-themes` bọc ở `main.tsx` (key `cms.theme`), script chống nháy trong `client/index.html`, khối `.dark` trong `index.css` (zinc + màu giá tối). VI/EN và Giao diện gom vào `shared/components/PreferenceMenu.tsx` (menu avatar; khách dùng nút bánh răng); đã xóa `LanguageSwitcher.tsx`.
+- Tiếp theo (tuần 1): deploy Vercel, chi tiết mã `/stocks/$symbol` (frame 04, lightweight-charts), hồ sơ.
 - Yarn 1 global đã gỡ; corepack đã bật không cần admin bằng `corepack enable --install-directory "%APPDATA%\npm" yarn`. Gõ `yarn` trực tiếp là ra 4.18.1 (terminal mở trước khi sửa thì mở lại).
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:
@@ -75,6 +78,8 @@
 - `doc/` (kế hoạch, hướng dẫn nội bộ của Minh) nằm trong `.gitignore`, không đưa lên GitHub.
 
 ## Cách làm việc
+
+-không tạo-tác động trựa tiếp vào workspace, gửi code lên chat để tôi xem xét qua và tôi sẽ tự thao tác lại lên ws.
 
 - Không mở rộng phạm vi. Đề xuất thêm gì phải nói rõ tốn bao nhiêu giờ và đổi lấy phần nào.
 - Bám tài liệu chính thức của thư viện. Code đơn giản, dễ giải thích khi bảo vệ.

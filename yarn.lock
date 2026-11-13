@@ -2623,6 +2623,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/devtools-event-client@npm:^0.4.1":
+  version: 0.4.4
+  resolution: "@tanstack/devtools-event-client@npm:0.4.4"
+  bin:
+    intent: ./bin/intent.js
+  checksum: 10c0/81884dc159fb30f896a804f2c0da2c3de75da1a7686850d3d59dedce4d583ea533a0396f9d27fb72f04134116a6193d9e52396674c29adb8be31fb331224e746
+  languageName: node
+  linkType: hard
+
+"@tanstack/form-core@npm:1.33.5":
+  version: 1.33.5
+  resolution: "@tanstack/form-core@npm:1.33.5"
+  dependencies:
+    "@tanstack/devtools-event-client": "npm:^0.4.1"
+    "@tanstack/pacer-lite": "npm:^0.1.1"
+    "@tanstack/store": "npm:^0.11.0"
+  checksum: 10c0/626bb5555e1c654bba8eb3ea38a415de52ebdfcd2e8189f2e7c91cb4d8355d81194276bece3067ca0709acfb2d02bdca4393550d84ecfde11378ad57f2b60f5f
+  languageName: node
+  linkType: hard
+
 "@tanstack/history@npm:1.162.5":
   version: 1.162.5
   resolution: "@tanstack/history@npm:1.162.5"
@@ -2630,10 +2650,32 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/pacer-lite@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@tanstack/pacer-lite@npm:0.1.1"
+  checksum: 10c0/c74c2e67dba3a14cd14134c27cff4856977c9019cf4dbe6a545a06960f4c9c8edad846e526595206aa01c42cc5cd5ee217761547ab6d2a3edec6fb3d69864686
+  languageName: node
+  linkType: hard
+
 "@tanstack/query-core@npm:5.107.1":
   version: 5.107.1
   resolution: "@tanstack/query-core@npm:5.107.1"
   checksum: 10c0/991070e0d7b9a7fb7459f6399090f22e9769dd30efcea316c3e9a0b5442990378fcdd9ed37548cec0729c627189e091100dbe7d3778c666100c373db0b978963
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-form@npm:^1.33.5":
+  version: 1.33.5
+  resolution: "@tanstack/react-form@npm:1.33.5"
+  dependencies:
+    "@tanstack/form-core": "npm:1.33.5"
+    "@tanstack/react-store": "npm:^0.11.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@tanstack/react-start":
+      optional: true
+  checksum: 10c0/035991b6589000f763dedcdf99a216d7eef2d58e7c98d9f6106738b14fe13e0141c4f515809f171107c80c432ba68d16ec72e9ebc8ad31dba8150db9fdc22a95
   languageName: node
   linkType: hard
 
@@ -2667,7 +2709,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/react-store@npm:^0.11.2":
+"@tanstack/react-store@npm:^0.11.0, @tanstack/react-store@npm:^0.11.2":
   version: 0.11.2
   resolution: "@tanstack/react-store@npm:0.11.2"
   dependencies:
@@ -2677,6 +2719,18 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/a755aa369c13824709ca5b29355ab7a72ba913d3561786f993412c8c375f36c54b20c0366bd406cf21b363b12e516a251a774ee7140479571b628e895448a93d
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-table@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "@tanstack/react-table@npm:9.3.1"
+  dependencies:
+    "@tanstack/react-store": "npm:^0.11.2"
+    "@tanstack/table-core": "npm:9.3.1"
+  peerDependencies:
+    react: ">=18"
+  checksum: 10c0/f9661605c1aa1308622cb26cd6867bd84c446c1a7586be2248d8aee1637ca918fa31740fdc3147fd08faf9a0409111b2a71c6c48a5cd2d920b97607b91966461
   languageName: node
   linkType: hard
 
@@ -2758,10 +2812,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/store@npm:0.11.2":
+"@tanstack/store@npm:0.11.2, @tanstack/store@npm:^0.11.0, @tanstack/store@npm:^0.11.2":
   version: 0.11.2
   resolution: "@tanstack/store@npm:0.11.2"
   checksum: 10c0/5422149c853c16e642a0ddfb51c2b4a867a11516069d3b9647659212e9762b86d609144de6ac6ec099b0360c3b198d1243f613148d69c1028dee56382f0430cd
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:9.3.1":
+  version: 9.3.1
+  resolution: "@tanstack/table-core@npm:9.3.1"
+  dependencies:
+    "@tanstack/store": "npm:^0.11.2"
+  checksum: 10c0/c3210477e552a046e9e80b8108dd5bad00d7651481ff47a2ffe7d18b0f51d4dcbeaa2e4d05fd8c2af2175ba7d6f730c597d0e791faa0032cea10b1fdc4b747d8
   languageName: node
   linkType: hard
 
@@ -3213,8 +3276,10 @@ __metadata:
     "@fontsource-variable/inter": "npm:^5.3.0"
     "@supabase/supabase-js": "npm:^2.119.0"
     "@tailwindcss/vite": "npm:^4.3.5"
+    "@tanstack/react-form": "npm:^1.33.5"
     "@tanstack/react-query": "npm:^5.107.1"
     "@tanstack/react-router": "npm:^1.170.46"
+    "@tanstack/react-table": "npm:^9.3.1"
     "@tanstack/router-plugin": "npm:^1.169.0"
     "@types/node": "npm:^24.19.2"
     "@types/react": "npm:^19.3.0"

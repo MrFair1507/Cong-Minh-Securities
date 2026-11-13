@@ -1,0 +1,39 @@
+{
+  "title": "Price board",
+  "toolbar": {
+    "search": "Search symbol",
+    "searchLabel": "Search a symbol on the price board",
+    "exchangeLabel": "Filter by exchange",
+    "all": "All"
+  },
+  "groups": {
+    "bid": "Bid",
+    "match": "Matched",
+    "ask": "Ask",
+    "foreign": "Foreign"
+  },
+  "columns": {
+    "ref": "Ref",
+    "ceiling": "Ceil",
+    "floor": "Floor",
+    "price1": "Price 1",
+    "price2": "Price 2",
+    "price3": "Price 3",
+    "volume1": "Vol 1",
+    "volume2": "Vol 2",
+    "volume3": "Vol 3",
+    "symbol": "Symbol",
+    "price": "Price",
+    "volume": "Vol",
+    "change": "+/-",
+    "totalVolume": "Total vol",
+    "average": "Avg",
+    "high": "High",
+    "low": "Low",
+    "room": "Room",
+    "foreignRatio": "%"
+  },
+  "sortHint": "Click to sort",
+  "empty": "No symbols match the filter",
+  "footer": "Price × 1,000 VND · Volume × 10 · Simulated data, not real prices"
+}

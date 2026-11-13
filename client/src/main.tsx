@@ -1,5 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
+import { ThemeProvider } from 'next-themes'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@/i18n'
@@ -30,9 +31,18 @@ const rootElement = document.getElementById('root')
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
+      {/* Sáng / Tối / Theo hệ thống: gắn class "dark" lên <html>, lưu ở localStorage (cms.theme) */}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+        storageKey="cms.theme"
+      >
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ThemeProvider>
     </StrictMode>,
   )
 }

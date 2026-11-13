@@ -28,6 +28,7 @@ import {
 } from '@/shared/ui/dropdown-menu'
 import { Input } from '@/shared/ui/input'
 import { Logo } from './Logo'
+import { PreferenceMenu, PreferenceMenuItems } from './PreferenceMenu'
 
 // Menu của sidebar trong Figma, chuyển lên header. Hồ sơ và Đăng xuất nằm trong menu avatar.
 const NAV_ITEMS = [
@@ -96,6 +97,7 @@ export function AppHeader({ session }: { session: Session | null }) {
             <AccountArea session={session} />
           ) : (
             <div className="flex items-center gap-2">
+              <PreferenceMenu />
               <Button asChild variant="outline" size="lg">
                 <Link to="/login">{t('header.login')}</Link>
               </Button>
@@ -162,6 +164,11 @@ function AccountArea({ session }: { session: Session }) {
                 {email}
               </span>
             )}
+            {profile?.account_no && (
+              <span className="font-mono text-xs font-normal text-muted-foreground">
+                {profile.account_no}
+              </span>
+            )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
@@ -170,6 +177,8 @@ function AccountArea({ session }: { session: Session }) {
               {t('nav.profile')}
             </Link>
           </DropdownMenuItem>
+          <PreferenceMenuItems />
+          <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={handleLogout}>
             <LogOut aria-hidden />
             {t('header.logout')}

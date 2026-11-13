@@ -370,65 +370,116 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_no: string
           cash_balance: number
           created_at: string
+          date_of_birth: string | null
           full_name: string
+          gender: string | null
           id: string
+          id_issued_on: string | null
+          id_number: string | null
+          kyc_verified_at: string | null
+          phone: string | null
           updated_at: string
         }
         Insert: {
+          account_no?: string
           cash_balance?: number
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string
+          gender?: string | null
           id: string
+          id_issued_on?: string | null
+          id_number?: string | null
+          kyc_verified_at?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Update: {
+          account_no?: string
           cash_balance?: number
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
+          id_issued_on?: string | null
+          id_number?: string | null
+          kyc_verified_at?: string | null
+          phone?: string | null
           updated_at?: string
         }
         Relationships: []
       }
       stocks: {
         Row: {
+          ask_prices: number[]
+          ask_volumes: number[]
+          bid_prices: number[]
+          bid_volumes: number[]
           ceiling_price: number
           exchange_id: number
           floor_price: number
+          foreign_limit: number
+          foreign_room: number
+          high_price: number | null
           id: number
+          last_volume: number
           loan_rate: number
+          low_price: number | null
           name: string
           price: number
           ref_price: number
           symbol: string
+          total_value: number
           updated_at: string
           volume: number
         }
         Insert: {
+          ask_prices?: number[]
+          ask_volumes?: number[]
+          bid_prices?: number[]
+          bid_volumes?: number[]
           ceiling_price: number
           exchange_id: number
           floor_price: number
+          foreign_limit?: number
+          foreign_room?: number
+          high_price?: number | null
           id?: number
+          last_volume?: number
           loan_rate?: number
+          low_price?: number | null
           name: string
           price: number
           ref_price: number
           symbol: string
+          total_value?: number
           updated_at?: string
           volume?: number
         }
         Update: {
+          ask_prices?: number[]
+          ask_volumes?: number[]
+          bid_prices?: number[]
+          bid_volumes?: number[]
           ceiling_price?: number
           exchange_id?: number
           floor_price?: number
+          foreign_limit?: number
+          foreign_room?: number
+          high_price?: number | null
           id?: number
+          last_volume?: number
           loan_rate?: number
+          low_price?: number | null
           name?: string
           price?: number
           ref_price?: number
           symbol?: string
+          total_value?: number
           updated_at?: string
           volume?: number
         }

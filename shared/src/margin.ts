@@ -1,6 +1,3 @@
-// Công thức ký quỹ dùng chung cho client (hiển thị) và simulator (sinh cảnh báo).
-// Bản quyết định khi đặt lệnh nằm trong RPC place_order (SQL), hai bên phải khớp nhau.
-
 export type MarginRates = {
   initialRate: number // tỷ lệ tối thiểu ngay sau khi vay
   callRate: number // dưới ngưỡng này: sinh cảnh báo
@@ -16,8 +13,6 @@ export const DEFAULT_RATES: MarginRates = {
 
 export type MarginStatus = 'SAFE' | 'CALL' | 'DANGER'
 
-// Tỷ lệ ký quỹ = (Tổng tài sản - Dư nợ) / Tổng tài sản
-// Tổng tài sản = tiền mặt + giá trị cổ phiếu đang giữ theo giá hiện tại
 export function marginRatio(totalAssets: number, debt: number): number {
   if (debt <= 0) return 1
   if (totalAssets <= 0) return 0

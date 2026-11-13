@@ -28,8 +28,35 @@ export function formatVolume(value: number): string {
   return integerFormat.format(value)
 }
 
+// Thay đổi giá có dấu: 300 -> "+0,30", -1200 -> "-1,20"
+export function formatPriceChange(value: number): string {
+  return `${value > 0 ? '+' : ''}${formatPrice(value)}`
+}
+
+// Bảng giá ghi khối lượng theo đơn vị 10 cổ phiếu: 3215400 -> "321.540"
+export function formatBoardVolume(value: number): string {
+  return integerFormat.format(Math.round(value / 10))
+}
+
+const ratioFormat = new Intl.NumberFormat('vi-VN', {
+  style: 'percent',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+// Tỷ lệ không dấu: 0.0888 -> "8,88%"
+export function formatRatio(ratio: number): string {
+  return ratioFormat.format(ratio)
+}
+
 // 0.016 -> "+1,60%", có dấu cộng khi dương
 export function formatPercent(ratio: number): string {
   const text = priceFormat.format(ratio * 100)
   return `${ratio > 0 ? '+' : ''}${text}%`
+}
+
+// '1990-05-02' -> '02/05/1990'
+export function formatDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-')
+  return `${day}/${month}/${year}`
 }

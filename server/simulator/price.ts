@@ -54,3 +54,43 @@ export function randomVolume(): number {
 export function pickRandom<T>(items: T[], count: number): T[] {
   return [...items].sort(() => Math.random() - 0.5).slice(0, count)
 }
+
+export const BOOK_DEPTH = 3 // bảng giá hiện 3 bước giá mỗi bên
+
+export type OrderBook = {
+  bidPrices: number[] // giá mua 1 (cao nhất) → 3
+  bidVolumes: number[]
+  askPrices: number[] // giá bán 1 (thấp nhất) → 3
+  askVolumes: number[]
+}
+
+// Sổ lệnh giả lập quanh giá khớp: bên mua thấp hơn 1–3 bước giá, bên bán cao hơn 1–3 bước.
+// Giá trần: dư mua ngay tại trần, bên bán trống. Giá sàn: dư bán ngay tại sàn, bên mua trống.
+// Chỉ để hiển thị, lệnh thị trường vẫn khớp theo giá khớp.
+export function buildOrderBook(
+  price: number,
+  limits: { ceiling: number; floor: number },
+): OrderBook {
+  const bidStart = price >= limits.ceiling ? price : price - TICK_SIZE
+  const askStart = price <= limits.floor ? price : price + TICK_SIZE
+  const bidPrices: number[] = []
+  const askPrices: number[] = []
+  for (let step = 0; step < BOOK_DEPTH; step++) {
+    const bid = bidStart - step * TICK_SIZE
+    const ask = askStart + step * TICK_SIZE
+    if (bid >= limits.floor) bidPrices.push(bid)
+    if (ask <= limits.ceiling) askPrices.push(ask)
+  }
+  return {
+    bidPrices,
+    bidVolumes: bidPrices.map(() => randomVolume()),
+    askPrices,
+    askVolumes: askPrices.map(() => randomVolume()),
+  }
+}
+
+// Room NĐTNN còn lại: thỉnh thoảng khối ngoại mua thêm vài lô, không xuống dưới 0
+export function nextForeignRoom(room: number): number {
+  if (Math.random() >= 0.3) return room
+  return Math.max(0, room - randomVolume())
+}
