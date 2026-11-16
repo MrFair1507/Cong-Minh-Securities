@@ -132,11 +132,12 @@
   --sidebar-ring: #a1a1aa;
 
   /* Màu giá theo quy ước công khai của thị trường */
-  --price-up: #16a34a;
+  /* Đậm một bậc để chữ 12px đạt tương phản 4.5:1 trên nền trắng */
+  --price-up: #15803d;
   --price-down: #dc2626;
-  --price-ref: #ca8a04;
+  --price-ref: #a16207;
   --price-ceil: #a21caf;
-  --price-floor: #0891b2;
+  --price-floor: #0e7490;
 
   /* Trạng thái ký quỹ: an toàn, cảnh báo, nguy hiểm */
   --safe: #16a34a;

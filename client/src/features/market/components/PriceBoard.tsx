@@ -9,27 +9,41 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { BoardStock } from '../api/stocks'
-import { boardColumns, boardFeatures } from './boardColumns'
+import {
+  boardColumns,
+  boardFeatures,
+  COMPACT_HIDDEN_COLUMNS,
+  type OnTrade,
+} from './boardColumns'
 
 type PriceBoardProps = {
   data: BoardStock[]
   sorting: SortingState
   onSortingChange: OnChangeFn<SortingState>
+  onTrade: OnTrade // bấm ô giá: mở panel đặt lệnh
+  activeSymbol?: string // mã đang mở trong panel, tô nền dòng đó
+  compact?: boolean // panel đang mở: ẩn bớt cột phụ cho vừa chỗ
 }
 
 export function PriceBoard({
   data,
   sorting,
   onSortingChange,
+  onTrade,
+  activeSymbol,
+  compact,
 }: PriceBoardProps) {
   const { t } = useTranslation('market')
-  const columns = useMemo(() => boardColumns(t), [t])
+  const columns = useMemo(() => boardColumns(t, onTrade), [t, onTrade])
 
   const table = useTable({
     features: boardFeatures,
     columns,
     data,
-    state: { sorting },
+    state: {
+      sorting,
+      columnVisibility: compact ? COMPACT_HIDDEN_COLUMNS : {},
+    },
     onSortingChange,
     getRowId: (row) => row.symbol,
   })
@@ -40,7 +54,8 @@ export function PriceBoard({
   return (
     <div className="flex flex-col gap-2">
       <table className="w-full border-collapse text-xs leading-4 tabular-nums">
-        <thead className="sticky top-16 z-10 bg-muted">
+        {/* Nền tối: --muted trùng --border nên header dùng --card để thấy đường kẻ */}
+        <thead className="sticky top-16 z-10 bg-muted dark:bg-card">
           {headerGroups.map((group, rowIndex) => (
             <tr key={group.id}>
               {group.headers.map((header) => {
@@ -62,7 +77,7 @@ export function PriceBoard({
                           ? 'descending'
                           : undefined
                     }
-                    className="border border-border px-1.5 py-1 text-center font-medium whitespace-nowrap text-muted-foreground"
+                    className="border border-border px-1.5 py-1 text-center font-medium whitespace-nowrap text-foreground/70"
                   >
                     {header.column.getCanSort() ? (
                       <button
@@ -90,8 +105,12 @@ export function PriceBoard({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="hover:bg-muted/40">
-              {row.getAllCells().map((cell) => (
+            <tr
+              key={row.id}
+              aria-current={row.id === activeSymbol ? true : undefined}
+              className="hover:bg-muted/40 aria-current:bg-primary/10"
+            >
+              {row.getVisibleCells().map((cell) => (
                 <td
                   key={cell.id}
                   className={cn(
@@ -107,7 +126,7 @@ export function PriceBoard({
           {rows.length === 0 && (
             <tr>
               <td
-                colSpan={table.getAllLeafColumns().length}
+                colSpan={table.getVisibleLeafColumns().length}
                 className="border border-border py-8 text-center text-sm text-muted-foreground"
               >
                 {t('empty')}

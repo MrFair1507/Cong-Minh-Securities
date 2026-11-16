@@ -39,10 +39,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_links: {
+        Row: {
+          account_no: string
+          balance: number
+          bank_code: string
+          created_at: string
+          holder_name: string
+          id: number
+          unlinked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          account_no: string
+          balance: number
+          bank_code: string
+          created_at?: string
+          holder_name: string
+          id?: number
+          unlinked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          account_no?: string
+          balance?: number
+          bank_code?: string
+          created_at?: string
+          holder_name?: string
+          id?: number
+          unlinked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_links_bank_code_fkey"
+            columns: ["bank_code"]
+            isOneToOne: false
+            referencedRelation: "banks"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "bank_links_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_otps: {
+        Row: {
+          code: string
+          expires_at: string
+          purpose: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          expires_at: string
+          purpose: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          expires_at?: string
+          purpose?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_otps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      banks: {
+        Row: {
+          code: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       cash_transactions: {
         Row: {
           amount: number
           balance_after: number
+          bank_link_id: number | null
           created_at: string
           id: number
           margin_loan_id: number | null
@@ -53,6 +149,7 @@ export type Database = {
         Insert: {
           amount: number
           balance_after: number
+          bank_link_id?: number | null
           created_at?: string
           id?: number
           margin_loan_id?: number | null
@@ -63,6 +160,7 @@ export type Database = {
         Update: {
           amount?: number
           balance_after?: number
+          bank_link_id?: number | null
           created_at?: string
           id?: number
           margin_loan_id?: number | null
@@ -71,6 +169,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cash_transactions_bank_link_id_fkey"
+            columns: ["bank_link_id"]
+            isOneToOne: false
+            referencedRelation: "bank_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cash_transactions_margin_loan_id_fkey"
             columns: ["margin_loan_id"]
@@ -285,29 +390,35 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          fee: number
           id: number
           price: number
           quantity: number
           side: Database["public"]["Enums"]["order_side"]
           stock_id: number
+          tax: number
           user_id: string
         }
         Insert: {
           created_at?: string
+          fee?: number
           id?: number
           price: number
           quantity: number
           side: Database["public"]["Enums"]["order_side"]
           stock_id: number
+          tax?: number
           user_id: string
         }
         Update: {
           created_at?: string
+          fee?: number
           id?: number
           price?: number
           quantity?: number
           side?: Database["public"]["Enums"]["order_side"]
           stock_id?: number
+          tax?: number
           user_id?: string
         }
         Relationships: [
@@ -493,15 +604,87 @@ export type Database = {
           },
         ]
       }
+      trades: {
+        Row: {
+          created_at: string
+          id: number
+          price: number
+          side: Database["public"]["Enums"]["order_side"]
+          stock_id: number
+          volume: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          price: number
+          side: Database["public"]["Enums"]["order_side"]
+          stock_id: number
+          volume: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          price?: number
+          side?: Database["public"]["Enums"]["order_side"]
+          stock_id?: number
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      check_transfer_amount: { Args: { p_amount: number }; Returns: undefined }
+      consume_bank_otp: {
+        Args: { p_code: string; p_purpose: string; p_user_id: string }
+        Returns: undefined
+      }
+      deposit_cash: {
+        Args: { p_amount: number; p_link_id: number }
+        Returns: number
+      }
+      fee_rate: { Args: never; Returns: number }
       initial_cash: { Args: never; Returns: number }
+      link_bank: {
+        Args: { p_account_no: string; p_bank_code: string; p_otp: string }
+        Returns: number
+      }
+      mock_bank_balance: { Args: never; Returns: number }
+      place_order: {
+        Args: {
+          p_quantity: number
+          p_side: Database["public"]["Enums"]["order_side"]
+          p_symbol: string
+        }
+        Returns: number
+      }
+      request_bank_otp: { Args: { p_purpose: string }; Returns: string }
+      sell_tax_rate: { Args: never; Returns: number }
+      unlink_bank: { Args: { p_link_id: number }; Returns: undefined }
+      withdraw_cash: {
+        Args: { p_amount: number; p_link_id: number; p_otp: string }
+        Returns: number
+      }
     }
     Enums: {
-      cash_tx_type: "INIT" | "BUY" | "SELL" | "LOAN" | "REPAY"
+      cash_tx_type:
+        | "INIT"
+        | "BUY"
+        | "SELL"
+        | "LOAN"
+        | "REPAY"
+        | "DEPOSIT"
+        | "WITHDRAW"
       margin_call_status: "OPEN" | "RESOLVED"
       order_side: "BUY" | "SELL"
     }
@@ -634,7 +817,15 @@ export const Constants = {
   },
   public: {
     Enums: {
-      cash_tx_type: ["INIT", "BUY", "SELL", "LOAN", "REPAY"],
+      cash_tx_type: [
+        "INIT",
+        "BUY",
+        "SELL",
+        "LOAN",
+        "REPAY",
+        "DEPOSIT",
+        "WITHDRAW",
+      ],
       margin_call_status: ["OPEN", "RESOLVED"],
       order_side: ["BUY", "SELL"],
     },

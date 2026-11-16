@@ -1,22 +1,34 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import enAuth from './en/auth.json'
+import enCash from './en/cash.json'
 import enCommon from './en/common.json'
 import enMarket from './en/market.json'
+import enTrading from './en/trading.json'
 import viAuth from './vi/auth.json'
+import viCash from './vi/cash.json'
 import viCommon from './vi/common.json'
 import viMarket from './vi/market.json'
+import viTrading from './vi/trading.json'
 
 export const defaultNS = 'common'
 export const languages = ['vi', 'en'] as const
 export type Language = (typeof languages)[number]
 
-const vi = { common: viCommon, auth: viAuth, market: viMarket }
+const vi = {
+  common: viCommon,
+  auth: viAuth,
+  market: viMarket,
+  trading: viTrading,
+  cash: viCash,
+}
 // satisfies: file tiếng Anh thiếu key nào so với tiếng Việt thì TypeScript báo lỗi
 const en = {
   common: enCommon,
   auth: enAuth,
   market: enMarket,
+  trading: enTrading,
+  cash: enCash,
 } satisfies typeof vi
 
 export const resources = { vi, en } as const

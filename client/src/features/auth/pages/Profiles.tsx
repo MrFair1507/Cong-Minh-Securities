@@ -3,11 +3,7 @@ import { useRouteContext } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/shared/components/PageHeader'
-import {
-  formatDate,
-  formatDateTime,
-  formatMoney,
-} from '@/shared/lib/format'
+import { formatDate, formatDateTime, formatMoney } from '@/shared/lib/format'
 import { Badge } from '@/shared/ui/badge'
 import {
   Card,

@@ -1,5 +1,7 @@
+import type { OrderSide } from '@cms/shared/trading'
 import { Link } from '@tanstack/react-router'
 import {
+  columnVisibilityFeature,
   createColumnHelper,
   createSortedRowModel,
   rowSortingFeature,
@@ -8,6 +10,7 @@ import {
   tableFeatures,
 } from '@tanstack/react-table'
 import type { TFunction } from 'i18next'
+import type { ReactNode } from 'react'
 import {
   formatBoardVolume,
   formatPrice,
@@ -19,15 +22,65 @@ import { averagePrice, toneClass } from '../lib/board'
 import { BoardValue } from './BoardValue'
 
 export const boardFeatures = tableFeatures({
+  columnVisibilityFeature,
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
   sortFns: { alphanumeric: sortFn_alphanumeric, basic: sortFn_basic },
   columnMeta: {} as { className?: string },
 })
 
+// Panel đặt lệnh mở thì bảng còn khoảng 1.000px: ẩn bước giá 3 (panel đã có sổ lệnh), TB, Cao, Thấp, NĐTNN
+export const COMPACT_HIDDEN_COLUMNS = Object.fromEntries(
+  [
+    'bid3',
+    'bid3Volume',
+    'ask3',
+    'ask3Volume',
+    'average',
+    'high',
+    'low',
+    'foreign_room',
+    'foreignRatio',
+  ].map((id) => [id, false]),
+)
+
 const column = createColumnHelper<typeof boardFeatures, BoardStock>()
 
 const HIGHLIGHT = { className: 'bg-muted/60' }
+
+// Bấm vào ô giá để mở panel đặt lệnh (giá bán → mua, giá mua → bán, giá khớp → mua)
+export type OnTrade = (symbol: string, side: OrderSide) => void
+
+type TradeTarget = { side: OrderSide; onTrade: OnTrade; t: TFunction<'market'> }
+
+function TradeButton({
+  stock,
+  price,
+  target,
+  children,
+}: {
+  stock: BoardStock
+  price: number | undefined
+  target: TradeTarget
+  children: ReactNode
+}) {
+  if (price === undefined) return children
+  const { side, onTrade, t } = target
+  return (
+    <button
+      type="button"
+      onClick={() => onTrade(stock.symbol, side)}
+      aria-label={t('columns.tradeLabel', {
+        side: t(side === 'BUY' ? 'stock.buy' : 'stock.sell'),
+        symbol: stock.symbol,
+        price: formatPrice(price),
+      })}
+      className="block w-full cursor-pointer hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+    >
+      {children}
+    </button>
+  )
+}
 
 const priceText = (price: number | undefined) =>
   price === undefined ? '' : formatPrice(price)
@@ -38,6 +91,7 @@ function priceColumn(
   id: string,
   header: string,
   getPrice: (s: BoardStock) => number | undefined,
+  target?: TradeTarget,
 ) {
   return column.accessor(getPrice, {
     id,
@@ -45,12 +99,19 @@ function priceColumn(
     enableSorting: false,
     cell: ({ getValue, row }) => {
       const price = getValue()
-      return (
+      const value = (
         <BoardValue
           value={price}
           text={priceText(price)}
           className={toneClass(price, row.original)}
         />
+      )
+      return target ? (
+        <TradeButton stock={row.original} price={price} target={target}>
+          {value}
+        </TradeButton>
+      ) : (
+        value
       )
     },
   })
@@ -103,7 +164,14 @@ function bookColumns(
   side: 'bid' | 'ask',
   t: TFunction<'market'>,
   levels: readonly (1 | 2 | 3)[],
+  onTrade: OnTrade,
 ) {
+  // Bấm giá bên bán là muốn mua, bấm giá bên mua là muốn bán
+  const target: TradeTarget = {
+    side: side === 'ask' ? 'BUY' : 'SELL',
+    onTrade,
+    t,
+  }
   const prices = (s: BoardStock) =>
     side === 'bid' ? s.bid_prices : s.ask_prices
   const volumes = (s: BoardStock) =>
@@ -111,7 +179,7 @@ function bookColumns(
   const list = levels.flatMap((n) => {
     const getPrice = (s: BoardStock) => prices(s)[n - 1]
     return [
-      priceColumn(`${side}${n}`, t(`columns.price${n}`), getPrice),
+      priceColumn(`${side}${n}`, t(`columns.price${n}`), getPrice, target),
       volumeColumn(
         `${side}${n}Volume`,
         t(`columns.volume${n}`),
@@ -123,7 +191,7 @@ function bookColumns(
   return column.columns(list)
 }
 
-export function boardColumns(t: TFunction<'market'>) {
+export function boardColumns(t: TFunction<'market'>, onTrade: OnTrade) {
   return column.columns([
     limitColumn('ref', t('columns.ref'), (s) => s.ref_price, 'text-price-ref'),
     limitColumn(
@@ -141,7 +209,7 @@ export function boardColumns(t: TFunction<'market'>) {
     column.group({
       id: 'bid',
       header: t('groups.bid'),
-      columns: bookColumns('bid', t, [3, 2, 1]),
+      columns: bookColumns('bid', t, [3, 2, 1], onTrade),
     }),
     column.accessor('symbol', {
       header: t('columns.symbol'),
@@ -168,11 +236,17 @@ export function boardColumns(t: TFunction<'market'>) {
           sortDescFirst: true,
           meta: HIGHLIGHT,
           cell: ({ getValue, row }) => (
-            <BoardValue
-              value={getValue()}
-              text={formatPrice(getValue())}
-              className={`font-semibold ${toneClass(getValue(), row.original)}`}
-            />
+            <TradeButton
+              stock={row.original}
+              price={getValue()}
+              target={{ side: 'BUY', onTrade, t }}
+            >
+              <BoardValue
+                value={getValue()}
+                text={formatPrice(getValue())}
+                className={`font-semibold ${toneClass(getValue(), row.original)}`}
+              />
+            </TradeButton>
           ),
         }),
         column.accessor('last_volume', {
@@ -214,7 +288,7 @@ export function boardColumns(t: TFunction<'market'>) {
     column.group({
       id: 'ask',
       header: t('groups.ask'),
-      columns: bookColumns('ask', t, [1, 2, 3]),
+      columns: bookColumns('ask', t, [1, 2, 3], onTrade),
     }),
     priceColumn('average', t('columns.average'), averagePrice),
     priceColumn('high', t('columns.high'), (s) => s.high_price ?? undefined),

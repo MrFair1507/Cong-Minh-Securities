@@ -31,16 +31,16 @@
     "high": "Cao",
     "low": "Thấp",
     "room": "Room",
-    "foreignRatio": "%"
+    "foreignRatio": "%",
+    "tradeLabel": "{{side}} {{symbol}} giá {{price}}"
   },
   "sortHint": "Bấm để sắp xếp",
   "empty": "Không có mã nào khớp với bộ lọc",
-  "footer": "Giá × 1.000 VNĐ · Khối lượng × 10 · Dữ liệu do bộ giả lập sinh ra, không phải giá thật",
+  "footer": "Giá × 1.000 VNĐ · Khối lượng × 10",
   "stock": {
     "back": "Bảng giá",
     "buy": "Mua",
     "sell": "Bán",
-    "tradeSoon": "Chức năng đặt lệnh đang được xây dựng",
     "chartTitle": "Biểu đồ nến · khung ngày",
     "rangeLabel": "Khoảng thời gian",
     "ranges": {
@@ -61,6 +61,30 @@
       "tickLot": "Bước giá · Lô",
       "tickLotValue": "{{tick}} · {{lot}} CP"
     },
+    "book": {
+      "title": "Dư mua – dư bán",
+      "ratioLabel": "Dư mua {{bid}}, dư bán {{ask}}",
+      "bidTotal": "Mua {{volume}} ({{percent}})",
+      "askTotal": "Bán {{volume}} ({{percent}})",
+      "bidVolume": "KL mua",
+      "bidPrice": "Giá mua",
+      "askPrice": "Giá bán",
+      "askVolume": "KL bán"
+    },
+    "trades": {
+      "title": "Khớp lệnh gần nhất",
+      "time": "Thời gian",
+      "price": "Giá",
+      "change": "+/-",
+      "volume": "KL",
+      "side": "M/B",
+      "BUY": "M",
+      "SELL": "B",
+      "sideBUY": "Mua chủ động",
+      "sideSELL": "Bán chủ động",
+      "totals": "Mua chủ động {{buy}} · Bán chủ động {{sell}}",
+      "empty": "Chưa có lần khớp nào trong phiên."
+    },
     "holding": {
       "title": "Bạn đang nắm giữ",
       "summary": "{{quantity}} CP · giá vốn {{cost}}",
@@ -68,7 +92,7 @@
     },
     "notFound": {
       "title": "Không tìm thấy mã chứng khoán",
-      "description": "Mã này không có trong danh sách 30 mã của bảng giá mô phỏng.",
+      "description": "Mã này không có trong danh sách 30 mã của bảng giá.",
       "back": "Về bảng giá"
     }
   }

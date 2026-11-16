@@ -15,7 +15,9 @@ import {
   priceLimits,
   randomChange,
   randomVolume,
+  type TradeSide,
   type Trend,
+  tradeSide,
 } from './price'
 
 const TICK_MS = 3000
@@ -36,6 +38,14 @@ type SimStock = {
   totalValue: number // tổng giá trị khớp, để tính giá TB
   book: OrderBook
   foreignRoom: number
+  lastSide: TradeSide // bên chủ động của lần khớp trước
+}
+
+type TradeRow = {
+  stock_id: number
+  price: number
+  volume: number
+  side: TradeSide
 }
 
 type Candle = {
@@ -119,7 +129,23 @@ async function loadStocks(): Promise<SimStock[]> {
       askVolumes: s.ask_volumes,
     },
     foreignRoom: s.foreign_room,
+    lastSide: 'BUY',
   }))
+}
+
+async function saveTrades(rows: TradeRow[]): Promise<void> {
+  if (rows.length === 0) return
+  const { error } = await supabase.from('trades').insert(rows)
+  if (error) throw error
+}
+
+// Sang ngày mới: xóa khớp lệnh của các ngày trước để bảng không phình
+async function clearOldTrades(date: string): Promise<void> {
+  const { error } = await supabase
+    .from('trades')
+    .delete()
+    .lt('created_at', `${date}T00:00:00+07:00`)
+  if (error) throw error
 }
 
 // Đọc nến của ngày đang giao dịch (khi script khởi động lại giữa ngày)
@@ -206,7 +232,10 @@ async function startSession(date: string, newDay: boolean): Promise<void> {
     }
   }
   await saveStocks(stocks)
-  if (newDay) await saveCandles(stocks)
+  if (newDay) {
+    await saveCandles(stocks)
+    await clearOldTrades(date)
+  }
   console.log(`== Phiên mới ${date}${newDay ? '' : ' (phiên nhanh)'} ==`)
 }
 
@@ -219,10 +248,19 @@ async function tick(): Promise<void> {
   }
 
   const picked = trend === 'none' ? pickRandom(stocks, STOCKS_PER_TICK) : stocks
+  const trades: TradeRow[] = []
   for (const s of picked) {
+    const previousPrice = s.price
     const change = randomChange(trend, s.price, s.refPrice)
     s.price = nextPrice(s.price, change, s)
     const volume = randomVolume()
+    s.lastSide = tradeSide(previousPrice, s.price, s.lastSide)
+    trades.push({
+      stock_id: s.id,
+      price: s.price,
+      volume,
+      side: s.lastSide,
+    })
     s.volume += volume
     s.lastVolume = volume
     s.totalValue += s.price * volume
@@ -241,6 +279,7 @@ async function tick(): Promise<void> {
   }
   await saveStocks(picked)
   await saveCandles(picked)
+  await saveTrades(trades)
 
   const time = new Date().toLocaleTimeString('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',

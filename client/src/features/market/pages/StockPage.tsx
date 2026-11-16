@@ -1,3 +1,4 @@
+import type { OrderSide } from '@cms/shared/trading'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   Link,
@@ -9,6 +10,8 @@ import { cn } from 'cn'
 import { ArrowLeft } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { OrderDialog } from '@/features/trading/components/OrderDialog'
+import { SIDE_STYLE } from '@/features/trading/components/OrderSummary'
 import {
   formatPercent,
   formatPrice,
@@ -23,6 +26,8 @@ import { stocksQueryOptions } from '../api/stocks'
 import { BoardValue } from '../components/BoardValue'
 import { CandleChart } from '../components/CandleChart'
 import { HoldingCard } from '../components/HoldingCard'
+import { OrderBookCard } from '../components/OrderBookCard'
+import { RecentTradesCard } from '../components/RecentTradesCard'
 import { TradingInfoCard } from '../components/TradingInfoCard'
 import { useStocksRealtime } from '../hooks/useStocksRealtime'
 import { toneClass } from '../lib/board'
@@ -49,6 +54,13 @@ export function StockPage() {
 
   const { data: history } = useSuspenseQuery(priceHistoryQueryOptions(stock.id))
   const [range, setRange] = useState<ChartRange>('3M')
+  const [orderOpen, setOrderOpen] = useState(false)
+  const [orderSide, setOrderSide] = useState<OrderSide>('BUY')
+
+  function openOrder(side: OrderSide) {
+    setOrderSide(side)
+    setOrderOpen(true)
+  }
 
   const allCandles = useMemo(
     () => withLiveCandle(history.map(toCandle), stock),
@@ -98,47 +110,64 @@ export function StockPage() {
 
         <div className="flex gap-2">
           <Button
-            disabled
-            title={t('stock.tradeSoon')}
-            className="bg-price-down text-white hover:bg-price-down/90"
+            size="lg"
+            onClick={() => openOrder('SELL')}
+            className={cn('px-5', SIDE_STYLE.SELL.solid)}
           >
             {t('stock.sell')}
           </Button>
           <Button
-            disabled
-            title={t('stock.tradeSoon')}
-            className="bg-price-up text-white hover:bg-price-up/90"
+            size="lg"
+            onClick={() => openOrder('BUY')}
+            className={cn('px-5', SIDE_STYLE.BUY.solid)}
           >
             {t('stock.buy')}
           </Button>
         </div>
       </div>
 
+      {session && (
+        <OrderDialog
+          stock={stock}
+          userId={session.user.id}
+          side={orderSide}
+          open={orderOpen}
+          onOpenChange={setOrderOpen}
+        />
+      )}
+
       <div className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-semibold">
-              {t('stock.chartTitle')}
-            </CardTitle>
-            <CardAction>
-              <Tabs
-                value={range}
-                onValueChange={(value) => setRange(value as ChartRange)}
-              >
-                <TabsList aria-label={t('stock.rangeLabel')}>
-                  {CHART_RANGES.map((r) => (
-                    <TabsTrigger key={r} value={r}>
-                      {t(`stock.ranges.${r}`)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-            </CardAction>
-          </CardHeader>
-          <div className="px-2">
-            <CandleChart candles={candles} fitKey={range} />
+        <div className="flex flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-semibold">
+                {t('stock.chartTitle')}
+              </CardTitle>
+              <CardAction>
+                <Tabs
+                  value={range}
+                  onValueChange={(value) => setRange(value as ChartRange)}
+                >
+                  <TabsList aria-label={t('stock.rangeLabel')}>
+                    {CHART_RANGES.map((r) => (
+                      <TabsTrigger key={r} value={r}>
+                        {t(`stock.ranges.${r}`)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </CardAction>
+            </CardHeader>
+            <div className="px-2">
+              <CandleChart candles={candles} fitKey={range} />
+            </div>
+          </Card>
+          {/* Dưới biểu đồ: sổ lệnh và khớp lệnh cạnh nhau, cột phải giữ thông tin giao dịch */}
+          <div className="grid grid-cols-2 items-start gap-4">
+            <OrderBookCard stock={stock} />
+            <RecentTradesCard stock={stock} />
           </div>
-        </Card>
+        </div>
 
         <div className="flex flex-col gap-4">
           <TradingInfoCard stock={stock} open={allCandles.at(-1)?.open} />

@@ -94,3 +94,17 @@ export function nextForeignRoom(room: number): number {
   if (Math.random() >= 0.3) return room
   return Math.max(0, room - randomVolume())
 }
+
+export type TradeSide = 'BUY' | 'SELL'
+
+// Bên chủ động của một lần khớp: giá lên là mua chủ động, giá xuống là bán chủ động,
+// đứng giá thì giữ như lần khớp trước
+export function tradeSide(
+  previousPrice: number,
+  price: number,
+  lastSide: TradeSide,
+): TradeSide {
+  if (price > previousPrice) return 'BUY'
+  if (price < previousPrice) return 'SELL'
+  return lastSide
+}

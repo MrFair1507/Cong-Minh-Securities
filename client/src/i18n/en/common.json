@@ -33,7 +33,7 @@
   "pages": {
     "market": {
       "title": "Price board",
-      "description": "30 HOSE/HNX symbols · prices come from a simulator, not real data"
+      "description": "30 HOSE/HNX symbols · real-time updates"
     },
     "stock": {
       "title": "Symbol details",
@@ -41,7 +41,7 @@
     },
     "orders": {
       "title": "Order history",
-      "description": "Filled buy and sell orders"
+      "description": "All filled market orders, newest first"
     },
     "portfolio": {
       "title": "Portfolio",
@@ -67,6 +67,11 @@
       "title": "Sign up",
       "description": "Create an account and get 100 million in virtual capital"
     }
+  },
+  "table": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "placeholder": "This page is under construction."
 }

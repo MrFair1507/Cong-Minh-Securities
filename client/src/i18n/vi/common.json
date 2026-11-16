@@ -33,7 +33,7 @@
   "pages": {
     "market": {
       "title": "Bảng giá",
-      "description": "30 mã HOSE/HNX · giá do bộ giả lập sinh ra, không phải dữ liệu thật"
+      "description": "30 mã HOSE/HNX · cập nhật theo thời gian thực"
     },
     "stock": {
       "title": "Chi tiết mã",
@@ -41,7 +41,7 @@
     },
     "orders": {
       "title": "Lịch sử lệnh",
-      "description": "Các lệnh mua bán đã khớp"
+      "description": "Tất cả lệnh thị trường đã khớp, mới nhất ở trên"
     },
     "portfolio": {
       "title": "Danh mục",
@@ -67,6 +67,11 @@
       "title": "Đăng ký",
       "description": "Tạo tài khoản, nhận ngay 100 triệu vốn ảo"
     }
+  },
+  "table": {
+    "showing": "Hiển thị {{from}}–{{to}} / {{total}}",
+    "previous": "Trước",
+    "next": "Sau"
   },
   "placeholder": "Trang này đang được xây dựng."
 }

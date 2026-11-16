@@ -48,3 +48,54 @@ export function filterStocks(
       (!q || s.symbol.includes(q)),
   )
 }
+
+export type BookLevel = {
+  bidPrice?: number
+  bidVolume?: number
+  askPrice?: number
+  askVolume?: number
+}
+
+export type BookSummary = {
+  levels: BookLevel[] // dòng 1 = giá mua cao nhất và giá bán thấp nhất
+  bidTotal: number
+  askTotal: number
+  bidRatio: number // tỷ lệ KL dư mua trên tổng hai bên, 0..1
+  maxVolume: number // KL lớn nhất trong sổ, để vẽ thanh nền
+}
+
+// Gom 3 bước giá mỗi bên thành từng dòng và tính tổng dư mua/dư bán
+export function bookSummary(
+  stock: Pick<
+    BoardStock,
+    'bid_prices' | 'bid_volumes' | 'ask_prices' | 'ask_volumes'
+  >,
+  depth = 3,
+): BookSummary {
+  const sum = (list: number[]) => list.reduce((a, b) => a + b, 0)
+  const bidTotal = sum(stock.bid_volumes)
+  const askTotal = sum(stock.ask_volumes)
+  const total = bidTotal + askTotal
+  const levels = Array.from({ length: depth }, (_, i) => ({
+    bidPrice: stock.bid_prices[i],
+    bidVolume: stock.bid_volumes[i],
+    askPrice: stock.ask_prices[i],
+    askVolume: stock.ask_volumes[i],
+  }))
+  return {
+    levels,
+    bidTotal,
+    askTotal,
+    bidRatio: total > 0 ? bidTotal / total : 0.5,
+    maxVolume: Math.max(0, ...stock.bid_volumes, ...stock.ask_volumes),
+  }
+}
+
+// Tổng KL mua chủ động / bán chủ động trong danh sách khớp lệnh
+export function sideTotals(
+  trades: { side: 'BUY' | 'SELL'; volume: number }[],
+): Record<'BUY' | 'SELL', number> {
+  const totals = { BUY: 0, SELL: 0 }
+  for (const trade of trades) totals[trade.side] += trade.volume
+  return totals
+}

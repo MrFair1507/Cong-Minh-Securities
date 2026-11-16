@@ -31,16 +31,16 @@
     "high": "High",
     "low": "Low",
     "room": "Room",
-    "foreignRatio": "%"
+    "foreignRatio": "%",
+    "tradeLabel": "{{side}} {{symbol}} at {{price}}"
   },
   "sortHint": "Click to sort",
   "empty": "No symbols match the filter",
-  "footer": "Price × 1,000 VND · Volume × 10 · Simulated data, not real prices",
+  "footer": "Price × 1,000 VND · Volume × 10",
   "stock": {
     "back": "Price board",
     "buy": "Buy",
     "sell": "Sell",
-    "tradeSoon": "Order placement is under construction",
     "chartTitle": "Candlestick chart · daily",
     "rangeLabel": "Time range",
     "ranges": {
@@ -61,6 +61,30 @@
       "tickLot": "Tick size · Lot",
       "tickLotValue": "{{tick}} · {{lot}} shares"
     },
+    "book": {
+      "title": "Bid – ask depth",
+      "ratioLabel": "Bid {{bid}}, ask {{ask}}",
+      "bidTotal": "Bid {{volume}} ({{percent}})",
+      "askTotal": "Ask {{volume}} ({{percent}})",
+      "bidVolume": "Bid vol",
+      "bidPrice": "Bid",
+      "askPrice": "Ask",
+      "askVolume": "Ask vol"
+    },
+    "trades": {
+      "title": "Recent trades",
+      "time": "Time",
+      "price": "Price",
+      "change": "+/-",
+      "volume": "Vol",
+      "side": "B/S",
+      "BUY": "B",
+      "SELL": "S",
+      "sideBUY": "Buyer-initiated",
+      "sideSELL": "Seller-initiated",
+      "totals": "Buyer-initiated {{buy}} · Seller-initiated {{sell}}",
+      "empty": "No trades this session yet."
+    },
     "holding": {
       "title": "You are holding",
       "summary": "{{quantity}} shares · avg cost {{cost}}",
@@ -68,7 +92,7 @@
     },
     "notFound": {
       "title": "Symbol not found",
-      "description": "This symbol is not among the 30 symbols on the simulated price board.",
+      "description": "This symbol is not among the 30 symbols on the price board.",
       "back": "Back to price board"
     }
   }

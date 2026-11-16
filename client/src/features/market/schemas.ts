@@ -1,5 +1,6 @@
 import type { SortingState } from '@tanstack/react-table'
 import { z } from 'zod'
+import { ORDER_SIDES } from '@/features/trading/schemas'
 
 export const EXCHANGES = ['HOSE', 'HNX'] as const
 export type Exchange = (typeof EXCHANGES)[number]
@@ -16,10 +17,17 @@ export const BOARD_SORTS = [
 ] as const
 export type BoardSort = (typeof BOARD_SORTS)[number]
 
+// trade + side: panel đặt lệnh đang mở cho mã nào, chiều nào (/market?trade=FPT&side=BUY)
 export const marketSearchSchema = z.object({
   exchange: z.enum(EXCHANGES).optional().catch(undefined),
   q: z.string().max(20).optional().catch(undefined),
   sort: z.enum(BOARD_SORTS).optional().catch(undefined),
+  trade: z
+    .string()
+    .regex(/^[A-Z0-9]{3}$/)
+    .optional()
+    .catch(undefined),
+  side: z.enum(ORDER_SIDES).optional().catch(undefined),
 })
 
 export type MarketSearch = z.infer<typeof marketSearchSchema>

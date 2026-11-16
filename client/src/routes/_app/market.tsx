@@ -7,6 +7,6 @@ import { marketSearchSchema } from '@/features/market/schemas'
 export const Route = createFileRoute('/_app/market')({
   validateSearch: marketSearchSchema,
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(stocksQueryOptions()),
+    context.queryClient.query({ ...stocksQueryOptions(), staleTime: 'static' }),
   component: MarketPage,
 })

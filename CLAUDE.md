@@ -43,7 +43,45 @@
 - Xong bảng giá `/market` (12/11, kế hoạch `~/.claude/plans/tingly-sparking-minsky.md`): migration `market_board` (stocks thêm `last_volume`, `high_price`/`low_price` cho phép null, `total_value`, `bid_/ask_prices`/`_volumes` dạng mảng 3 bước, `foreign_limit`/`foreign_room`); simulator dựng sổ lệnh (`buildOrderBook` trong `price.ts`). Client: `features/market/` (api `stocksQueryOptions` + `BoardStock`, `useStocksRealtime` ghi thẳng vào cache Query, không dùng Zustand; `lib/board.ts` tô màu/lọc; `boardColumns.tsx` 25 cột 2 tầng; `BoardValue` nháy ô). TanStack Table là **v9** (`useTable` + `tableFeatures`, gộp cột bằng `column.columns([...])`). Search params `exchange`, `q`, `sort` (`-volume`...). Lệnh `db push`/`db query` tới cloud cần `--yes` khi Claude chạy, đọc dùng `--read-only`. 13/11: Realtime đã kiểm tra bằng script với publishable key (anon nhận đủ UPDATE); giao diện chưa xem trên trình duyệt. Simulator chạy trên máy, không tự chạy trên cloud: giá chỉ nhảy khi `yarn dev` / `yarn workspace server start` đang chạy.
 - Xong theme sáng/tối/hệ thống (12/11): `next-themes` bọc ở `main.tsx` (key `cms.theme`), script chống nháy trong `client/index.html`, khối `.dark` trong `index.css` (zinc + màu giá tối). VI/EN và Giao diện gom vào `shared/components/PreferenceMenu.tsx` (menu avatar; khách dùng nút bánh răng); đã xóa `LanguageSwitcher.tsx`.
 - Xong chi tiết mã `/stocks/$symbol` (13/11, frame 04): dùng lại cache `['stocks']` + `useStocksRealtime` của bảng giá; loader `notFound()` khi sai mã. Nến từ `price_history` (`api/priceHistory.ts`), nến cuối ghép giá đang chạy (`lib/candles.ts`: `withLiveCandle`, `filterRange` 1T/3T/6T/1N). `CandleChart.tsx` dùng lightweight-charts **v5** (`addSeries(CandlestickSeries)`), màu đọc từ biến CSS + MutationObserver theo theme. Thẻ Thông tin giao dịch, thẻ Đang nắm giữ (`features/portfolio/api/holdings.ts`, ẩn khi chưa có). Nút Mua/Bán đang `disabled` chờ hộp thoại Đặt lệnh (tuần 2). Hằng `TICK_SIZE`, `LOT_SIZE` ở `shared/constants/market.ts`. Chưa xem trên trình duyệt.
-- Tiếp theo (tuần 1): deploy Vercel, hồ sơ.
+  -- Xong `/profile` chỉ đọc (16/11, commit `435211d`): trang `features/auth/pages/Profiles.tsx`, 2 thẻ Tài khoản + Định danh (eKYC); `_authed` beforeLoad trả `session` không null cho route con; `format.ts` thêm `formatDateTime` (timestamptz → dd/mm/yyyy giờ VN). Sửa tên, đặt lại tiền ảo (cần RPC) để tuần 2; đổi mật khẩu chưa làm.
+- TanStack Query 5.107 đánh dấu `ensureQueryData` là deprecated: loader dùng `queryClient.query({ ...options, staleTime: 'static' })`.
+- Hoãn deploy Vercel (16/11, chưa đăng nhập được Vercel vì không có điện thoại). Có điện thoại thì làm theo checklist (khoảng 30 phút): Root Directory `client`, env `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `ENABLE_EXPERIMENTAL_COREPACK=1`; Supabase Auth URL Configuration thêm domain Vercel.
+- Còn của tuần 1: xem trên trình duyệt các trang đăng ký, đăng nhập, `/market`, `/stocks/$symbol`, `/profile` (chưa xem lần nào).
+- Kế hoạch tuần 2: `~/.claude/plans/xem-va-len-kec-stateless-falcon.md`. Minh chốt: bán khi còn nợ thì tiền về tiền mặt, tự trả nợ; **có phí 0,15% (mua và bán) + thuế bán 0,1%**; tuần 2 làm cả sửa tên và đặt lại tiền ảo ở `/profile`.
+- Xong 16–18/11 (làm ngày 16/11, chưa commit):
+  - Migration `trading` đã push: `orders.fee`/`orders.tax`, hàm `fee_rate()`/`sell_tax_rate()`, vá `handle_new_user` (thêm `set search_path = ''` bị mất ở `kyc_profile`), RPC `place_order(p_symbol, p_side, p_quantity) returns bigint` (khóa `profiles for update`, phí/thuế gộp vào dòng BUY/SELL của `cash_transactions`, giá vốn có tính phí mua, bán hết thì xóa holdings; lỗi trả mã trong message: `INVALID_QUANTITY`, `STOCK_NOT_FOUND`, `INSUFFICIENT_CASH`, `INSUFFICIENT_SHARES`, `NOT_AUTHENTICATED`; chỉ `authenticated` được execute). Đã kiểm bằng SQL (transaction tự rollback) và trên trình duyệt.
+  - `shared/src/trading.ts` (`@cms/shared/trading`): `FEE_RATE`, `SELL_TAX_RATE`, `orderCost`, `maxBuyQuantity`. Đổi số thì đổi cả hàm SQL.
+  - `features/trading/`: `api/placeOrder.ts` (`usePlaceOrder`, invalidate `profile`/`holdings`/`orders`/`cash`), `OrderDialog` → `OrderForm` (frame 10, TanStack Form + Zod chỉ kiểm định dạng, giới hạn tối đa tính theo giá sống) → `OrderConfirm` (frame 11). Nút Mua/Bán ở `StockPage` đã bật. Nhánh vay ký quỹ chưa làm (21/11).
+  - `shared/components/DataTable.tsx` (TanStack Table v9 + `rowPaginationFeature`, 20 dòng/trang, `createDataColumnHelper`). `/orders` (frame 05, `?side=&symbol=`, lọc ở client). `FormField` thêm prop `hint`; `format.ts` thêm `formatTime`; i18n namespace `trading`.
+  - Sửa bảng giá theo bản soi: màu giá nền sáng đậm một bậc, header bảng `text-foreground/70`, nền tối `dark:bg-card`.
+  - Tài khoản test trên cloud: `test.order.1794811190122@example.com` / `Test@12345` (đang giữ 700 FPT, tiền mặt khoảng 9 triệu).
+- Xong nâng cấp mua/bán (16/11, chưa commit; chỉ lấy ý chung của các sàn, không dựng lại giao diện nơi thực tập):
+  - Bước 1:
+    - `shared/src/trading.ts` thêm `sellProfit`; `features/trading/lib/order.ts` thêm `quickQuantity`, `stepQuantity`.
+    - `OrderForm` có nút −/+, nút 25–100%, dòng KL tối đa. `OrderCostRows` hiện lãi/lỗ tạm tính khi bán. `FormField` thêm slot `before`/`after`.
+  - Bước 2: `features/market/components/OrderBookCard.tsx` (`OrderBook` + `OrderBookCard`), `lib/board.ts` thêm `bookSummary`, `sideTotals`.
+  - Bước 3, khớp lệnh:
+    - Migration `market_trades` đã push: bảng `trades` (`stock_id`, `price`, `volume`, `side` = bên chủ động), ai cũng đọc được, có Realtime.
+    - Simulator ghi một dòng cho mỗi mã khớp trong nhịp; sang ngày mới thì xóa khớp lệnh ngày cũ. `price.ts` thêm `tradeSide`.
+    - Client: `api/trades.ts`, `hooks/useTradesRealtime.ts`, `RecentTradesCard.tsx`. `format.ts` thêm `formatClock`. Đã kiểm khách nhận INSERT qua Realtime.
+  - Bước 4, panel:
+    - `features/trading/components/OrderSteps.tsx` tách khỏi Dialog. `OrderSurface.tsx` chọn header/footer theo `dialog` | `panel`.
+    - `TradePanel.tsx`, `StockPicker.tsx` (shadcn `command` + `popover`, `cmdk`; `CommandInput` tự viết lại, không dùng `input-group`). `shared/lib/text.ts` có `foldText` (bỏ dấu).
+    - `/market?trade=&side=`; `boardColumns(t, onTrade)`, `PriceBoard` có `compact` (ẩn cột bằng `columnVisibilityFeature`).
+  - Phải khởi động lại `yarn dev` để simulator chạy code mới (có ghi `trades`). Còn simulator mồ côi PID 13760/28292 đang chạy code cũ.
+- Xong `/cash` + liên kết ngân hàng mô phỏng (16/11, kéo sớm phần `/cash` của 20/11, chưa commit). Minh chốt: số dư ngân hàng ảo khép kín, có OTP mô phỏng, có QR.
+  - Migration `bank_enum` (thêm `DEPOSIT`/`WITHDRAW` vào `cash_tx_type`, tách riêng vì enum mới không dùng được trong cùng transaction) và `bank_links`, đã push.
+    - Bảng `banks` (ALPHA/BETA/GAMMA, tên tự đặt) và `bank_links` (hủy liên kết chỉ đặt `unlinked_at`; tối đa 2 liên kết; mỗi liên kết có sẵn 500 triệu ảo qua `mock_bank_balance()`). Bảng `bank_otps`: client không đọc được.
+    - `cash_transactions` thêm cột `bank_link_id` và viết lại CHECK.
+    - RPC: `request_bank_otp(p_purpose)` trả mã về cho giao diện, `link_bank` (bắt buộc eKYC, tên chủ TK lấy từ `full_name`), `unlink_bank`, `deposit_cash`, `withdraw_cash` (cần OTP; còn nợ ký quỹ thì báo `MARGIN_DEBT_OUTSTANDING`).
+    - `consume_bank_otp` và `check_transfer_amount` là hàm nội bộ. Đã kiểm 17 trường hợp bằng SQL (rollback) và kiểm quyền.
+  - `features/cash/`:
+    - `api/` gồm `cash.ts`, `banks.ts`, `bankActions.ts`. `lib/cash.ts` gồm `flowTotals` (bỏ INIT), `maskAccount`, `parseMoney`, `depositQrPayload` (`CMS-MOCK|…`, cố ý không theo chuẩn thanh toán thật).
+    - Component: `BankParts` (ChoiceCards, AmountField, OtpField, CopyRow), `LinkBankDialog`, `DepositDialog` (tab Nộp nhanh / Chuyển khoản QR, dùng `qrcode.react`), `WithdrawDialog`, `BankAccounts`, `cashColumns`, `pages/CashPage.tsx`.
+  - `/cash?type=`. Thêm `shared/components/ConfirmDialog.tsx` và i18n namespace `cash`.
+  - `shared/lib/numberWords.ts`: `moneyToWords(amount, language)` đọc số tiền thành chữ (vi: "Mười một triệu một trăm nghìn đồng", có linh/lăm/mốt/tư/không trăm/nghìn tỷ; en: "Eleven million one hundred thousand dong"). Hiện dưới ô số tiền của `AmountField` và được gắn vào `aria-describedby`.
+  - Tài khoản test có eKYC: `test.bank.<số>@example.com` / `Test@12345` (tạo khi chạy e2e, vài tài khoản; tài khoản cuối là `test.bank.1794820239357@example.com`).
+- Tiếp theo: 19/11 `/portfolio` · 20/11 migration `margin` (`/cash` đã làm sớm) · 21/11 `/margin` + 2 hộp thoại ký quỹ + nhánh vay · 22/11 cảnh báo ký quỹ, demo, `/profile` sửa tên + `reset_account`.
 - Yarn 1 global đã gỡ; corepack đã bật không cần admin bằng `corepack enable --install-directory "%APPDATA%\npm" yarn`. Gõ `yarn` trực tiếp là ra 4.18.1 (terminal mở trước khi sửa thì mở lại).
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:

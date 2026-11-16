@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./margin": "./src/margin.ts"
+    "./margin": "./src/margin.ts",
+    "./trading": "./src/trading.ts"
   }
 }

@@ -69,3 +69,26 @@ const dateTimeFormat = new Intl.DateTimeFormat('vi-VN', {
 export function formatDateTime(isoDateTime: string): string {
   return dateTimeFormat.format(new Date(isoDateTime))
 }
+
+const timeFormat = new Intl.DateTimeFormat('vi-VN', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Ho_Chi_Minh',
+})
+// timestamptz -> "09:05" giờ Việt Nam
+export function formatTime(isoDateTime: string): string {
+  return timeFormat.format(new Date(isoDateTime))
+}
+
+const clockFormat = new Intl.DateTimeFormat('vi-VN', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false,
+  timeZone: 'Asia/Ho_Chi_Minh',
+})
+// timestamptz -> "09:05:30" giờ Việt Nam
+export function formatClock(isoDateTime: string): string {
+  return clockFormat.format(new Date(isoDateTime))
+}
