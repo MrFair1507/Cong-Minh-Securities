@@ -2,7 +2,6 @@ import type { QueryData } from '@supabase/supabase-js'
 import { queryOptions } from '@tanstack/react-query'
 import { supabase } from '@/shared/api/supabase'
 
-// Nến ngày của một mã, cũ đến mới: lịch sử seed + nến hôm nay do simulator ghi
 const historyQuery = (stockId: number) =>
   supabase
     .from('price_history')

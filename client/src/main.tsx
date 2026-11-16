@@ -31,7 +31,6 @@ const rootElement = document.getElementById('root')
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
-      {/* Sáng / Tối / Theo hệ thống: gắn class "dark" lên <html>, lưu ở localStorage (cms.theme) */}
       <ThemeProvider
         attribute="class"
         defaultTheme="system"

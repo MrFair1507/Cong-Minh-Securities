@@ -14,7 +14,6 @@ const priceFormat = new Intl.NumberFormat('vi-VN', {
 
 const integerFormat = new Intl.NumberFormat('vi-VN')
 
-// 14770000 -> "14.770.000 ₫"
 export function formatMoney(value: number): string {
   return moneyFormat.format(value)
 }
@@ -59,4 +58,14 @@ export function formatPercent(ratio: number): string {
 export function formatDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-')
   return `${day}/${month}/${year}`
+}
+
+const dateTimeFormat = new Intl.DateTimeFormat('vi-VN', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  timeZone: 'Asia/Ho_Chi_Minh',
+})
+export function formatDateTime(isoDateTime: string): string {
+  return dateTimeFormat.format(new Date(isoDateTime))
 }

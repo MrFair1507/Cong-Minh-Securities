@@ -95,7 +95,7 @@ export function StockPage() {
             </span>
           </div>
         </div>
-        {/* Hộp thoại Đặt lệnh làm ở tuần 2 */}
+
         <div className="flex gap-2">
           <Button
             disabled
