@@ -180,6 +180,13 @@ export type Database = {
             foreignKeyName: "cash_transactions_margin_loan_id_fkey"
             columns: ["margin_loan_id"]
             isOneToOne: false
+            referencedRelation: "margin_loan_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_transactions_margin_loan_id_fkey"
+            columns: ["margin_loan_id"]
+            isOneToOne: false
             referencedRelation: "margin_loans"
             referencedColumns: ["id"]
           },
@@ -264,30 +271,46 @@ export type Database = {
       }
       margin_accounts: {
         Row: {
+          auto_renew: boolean
+          auto_repay: boolean
           call_rate: number
           created_at: string
           id: number
           initial_rate: number
           maintenance_rate: number
+          package_code: string
           user_id: string
         }
         Insert: {
+          auto_renew?: boolean
+          auto_repay?: boolean
           call_rate?: number
           created_at?: string
           id?: number
           initial_rate?: number
           maintenance_rate?: number
+          package_code?: string
           user_id: string
         }
         Update: {
+          auto_renew?: boolean
+          auto_repay?: boolean
           call_rate?: number
           created_at?: string
           id?: number
           initial_rate?: number
           maintenance_rate?: number
+          package_code?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "margin_accounts_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "margin_accounts_user_id_fkey"
             columns: ["user_id"]
@@ -344,30 +367,54 @@ export type Database = {
       }
       margin_loans: {
         Row: {
+          accrued_interest: number
           created_at: string
+          due_date: string
           id: number
+          interest_from: string
+          interest_paid: number
+          interest_rate: number | null
+          loan_date: string
           margin_account_id: number
           order_id: number
           outstanding: number
+          package_code: string
           principal: number
+          renew_count: number
           updated_at: string
         }
         Insert: {
+          accrued_interest?: number
           created_at?: string
+          due_date?: string
           id?: number
+          interest_from?: string
+          interest_paid?: number
+          interest_rate?: number | null
+          loan_date?: string
           margin_account_id: number
           order_id: number
           outstanding: number
+          package_code?: string
           principal: number
+          renew_count?: number
           updated_at?: string
         }
         Update: {
+          accrued_interest?: number
           created_at?: string
+          due_date?: string
           id?: number
+          interest_from?: string
+          interest_paid?: number
+          interest_rate?: number | null
+          loan_date?: string
           margin_account_id?: number
           order_id?: number
           outstanding?: number
+          package_code?: string
           principal?: number
+          renew_count?: number
           updated_at?: string
         }
         Relationships: [
@@ -383,6 +430,161 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: true
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_loans_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      margin_package_stocks: {
+        Row: {
+          package_code: string
+          stock_id: number
+        }
+        Insert: {
+          package_code: string
+          stock_id: number
+        }
+        Update: {
+          package_code?: string
+          stock_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_package_stocks_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "margin_package_stocks_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      margin_package_tiers: {
+        Row: {
+          annual_rate: number
+          from_day: number
+          package_code: string
+          to_day: number | null
+        }
+        Insert: {
+          annual_rate: number
+          from_day: number
+          package_code: string
+          to_day?: number | null
+        }
+        Update: {
+          annual_rate?: number
+          from_day?: number
+          package_code?: string
+          to_day?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_package_tiers_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      margin_packages: {
+        Row: {
+          code: string
+          exclusive: boolean
+          interest_rate: number | null
+          sort_order: number
+          term_days: number
+        }
+        Insert: {
+          code: string
+          exclusive?: boolean
+          interest_rate?: number | null
+          sort_order: number
+          term_days: number
+        }
+        Update: {
+          code?: string
+          exclusive?: boolean
+          interest_rate?: number | null
+          sort_order?: number
+          term_days?: number
+        }
+        Relationships: []
+      }
+      margin_service_events: {
+        Row: {
+          auto_renew: boolean | null
+          auto_repay: boolean | null
+          created_at: string
+          due_date: string | null
+          id: number
+          margin_loan_id: number | null
+          package_code: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          auto_repay?: boolean | null
+          created_at?: string
+          due_date?: string | null
+          id?: number
+          margin_loan_id?: number | null
+          package_code?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          auto_repay?: boolean | null
+          created_at?: string
+          due_date?: string | null
+          id?: number
+          margin_loan_id?: number | null
+          package_code?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_service_events_margin_loan_id_fkey"
+            columns: ["margin_loan_id"]
+            isOneToOne: false
+            referencedRelation: "margin_loan_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_service_events_margin_loan_id_fkey"
+            columns: ["margin_loan_id"]
+            isOneToOne: false
+            referencedRelation: "margin_loans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_service_events_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "margin_service_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -433,6 +635,38 @@ export type Database = {
             foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      password_reset_otps: {
+        Row: {
+          attempts: number
+          code: string
+          created_at: string
+          expires_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code: string
+          created_at?: string
+          expires_at: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code?: string
+          created_at?: string
+          expires_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "password_reset_otps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -641,9 +875,65 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      margin_loan_balances: {
+        Row: {
+          created_at: string | null
+          debt: number | null
+          due_date: string | null
+          id: number | null
+          interest_due: number | null
+          interest_paid: number | null
+          interest_rate: number | null
+          loan_date: string | null
+          margin_account_id: number | null
+          order_id: number | null
+          order_quantity: number | null
+          outstanding: number | null
+          package_code: string | null
+          principal: number | null
+          renew_count: number | null
+          status: string | null
+          symbol: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_loans_margin_account_id_fkey"
+            columns: ["margin_account_id"]
+            isOneToOne: false
+            referencedRelation: "margin_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_loans_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "margin_loans_package_code_fkey"
+            columns: ["package_code"]
+            isOneToOne: false
+            referencedRelation: "margin_packages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
     }
     Functions: {
+      apply_repayment: {
+        Args: { p_amount: number; p_loan_id: number }
+        Returns: undefined
+      }
+      cancel_margin_package: { Args: never; Returns: undefined }
       check_transfer_amount: { Args: { p_amount: number }; Returns: undefined }
       consume_bank_otp: {
         Args: { p_code: string; p_purpose: string; p_user_id: string }
@@ -653,24 +943,78 @@ export type Database = {
         Args: { p_amount: number; p_link_id: number }
         Returns: number
       }
+      end_session_margin: { Args: never; Returns: Record<string, unknown> }
       fee_rate: { Args: never; Returns: number }
-      initial_cash: { Args: never; Returns: number }
       link_bank: {
         Args: { p_account_no: string; p_bank_code: string; p_otp: string }
         Returns: number
       }
+      loan_annual_rate: {
+        Args: { p_day: number; p_package_code: string; p_rate: number }
+        Returns: number
+      }
+      loan_interest: {
+        Args: {
+          p_from: string
+          p_loan_date: string
+          p_outstanding: number
+          p_package_code: string
+          p_rate: number
+          p_to: string
+        }
+        Returns: number
+      }
+      margin_position: {
+        Args: { p_user_id: string }
+        Returns: Record<string, unknown>
+      }
+      margin_ratio: {
+        Args: { p_assets: number; p_debt: number }
+        Returns: number
+      }
       mock_bank_balance: { Args: never; Returns: number }
+      open_margin_account: {
+        Args: { p_auto_renew?: boolean; p_auto_repay?: boolean }
+        Returns: number
+      }
       place_order: {
         Args: {
           p_quantity: number
           p_side: Database["public"]["Enums"]["order_side"]
           p_symbol: string
+          p_use_margin?: boolean
         }
         Returns: number
       }
+      register_margin_package: { Args: { p_code: string }; Returns: undefined }
+      renew_loan_internal: {
+        Args: { p_loan_id: number; p_type: string }
+        Returns: string
+      }
+      renew_margin_loan: { Args: { p_loan_id: number }; Returns: string }
+      repay_margin_loan: {
+        Args: { p_amount: number; p_loan_id: number }
+        Returns: undefined
+      }
       request_bank_otp: { Args: { p_purpose: string }; Returns: string }
+      request_password_reset: {
+        Args: { p_email: string; p_id_number: string; p_phone: string }
+        Returns: {
+          code: string
+          phone_tail: string
+        }[]
+      }
+      reset_password: {
+        Args: { p_code: string; p_email: string; p_new_password: string }
+        Returns: string
+      }
       sell_tax_rate: { Args: never; Returns: number }
       unlink_bank: { Args: { p_link_id: number }; Returns: undefined }
+      update_margin_settings: {
+        Args: { p_auto_renew: boolean; p_auto_repay: boolean }
+        Returns: undefined
+      }
+      vn_today: { Args: never; Returns: string }
       withdraw_cash: {
         Args: { p_amount: number; p_link_id: number; p_otp: string }
         Returns: number

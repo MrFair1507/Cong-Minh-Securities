@@ -237,6 +237,23 @@ async function startSession(date: string, newDay: boolean): Promise<void> {
     await clearOldTrades(date)
   }
   console.log(`== Phiên mới ${date}${newDay ? '' : ' (phiên nhanh)'} ==`)
+  await endSessionMargin()
+}
+
+// Cuối phiên trước: tự thu nợ ký quỹ từ tiền mặt và tự gia hạn khoản vay tới hạn
+// (RPC end_session_margin, chỉ secret key gọi được). Chạy cả ở phiên nhanh để demo thấy được.
+async function endSessionMargin(): Promise<void> {
+  const { data, error } = await supabase.rpc('end_session_margin')
+  if (error) {
+    console.error('  ! Thu nợ cuối phiên lỗi:', error.message)
+    return
+  }
+  const result = data?.[0]
+  if (result && (result.repaid_loans > 0 || result.renewed_loans > 0)) {
+    console.log(
+      `  $ Ký quỹ: thu nợ ${result.repaid_loans} khoản, gia hạn ${result.renewed_loans} khoản`,
+    )
+  }
 }
 
 async function tick(): Promise<void> {

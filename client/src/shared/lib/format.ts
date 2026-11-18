@@ -22,6 +22,16 @@ export function formatPrice(value: number): string {
   return priceFormat.format(value / 1000)
 }
 
+const compactFormat = new Intl.NumberFormat('vi-VN', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
+// Số gọn cho chỗ hẹp: 143630000 -> "143,6 Tr"
+export function formatCompact(value: number): string {
+  return compactFormat.format(value)
+}
+
 // 3215400 -> "3.215.400"
 export function formatVolume(value: number): string {
   return integerFormat.format(value)
@@ -46,6 +56,16 @@ const ratioFormat = new Intl.NumberFormat('vi-VN', {
 // Tỷ lệ không dấu: 0.0888 -> "8,88%"
 export function formatRatio(ratio: number): string {
   return ratioFormat.format(ratio)
+}
+
+const rateFormat = new Intl.NumberFormat('vi-VN', {
+  style: 'percent',
+  maximumFractionDigits: 2,
+})
+
+// Lãi suất, ngưỡng: bỏ số 0 thừa: 0.4 -> "40%", 0.095 -> "9,5%"
+export function formatRate(rate: number): string {
+  return rateFormat.format(rate)
 }
 
 // 0.016 -> "+1,60%", có dấu cộng khi dương

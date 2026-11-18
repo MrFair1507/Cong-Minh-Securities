@@ -24,13 +24,12 @@ import {
 import { MAX_BANK_LINKS, maskAccount } from '../lib/cash'
 import { BankMark } from './BankParts'
 
-// Thẻ "Ngân hàng liên kết": các tài khoản đang liên kết + nút liên kết thêm
 export function BankAccounts({
   userId,
   onLink,
 }: {
   userId: string
-  onLink: () => void // mở hộp thoại liên kết (do trang quản lý)
+  onLink: () => void
 }) {
   const { t } = useTranslation('cash')
   const { data: banks } = useQuery(banksQueryOptions())

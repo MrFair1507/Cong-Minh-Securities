@@ -103,3 +103,9 @@ begin
   end loop;
 end;
 $$;
+
+-- Rổ mã gói vay Ưu đãi (migration margin cũng chèn, nhưng khi reset DB thì seed chạy sau migration)
+insert into public.margin_package_stocks (package_code, stock_id)
+select 'PREFERRED', id from public.stocks
+where symbol in ('ACB', 'BID', 'CTG', 'FPT', 'HPG', 'MBB', 'VCB', 'VNM')
+on conflict do nothing;

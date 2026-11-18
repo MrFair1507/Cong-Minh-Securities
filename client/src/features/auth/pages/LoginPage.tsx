@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { FormField } from '@/shared/components/FormField'
@@ -10,9 +10,10 @@ import { loginSchema } from '../schemas'
 export function LoginPage() {
   const { t } = useTranslation('auth')
   const schema = loginSchema(t)
+  const search = useSearch({ from: '/_guest/login' })
 
   const form = useForm({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: search.email ?? '', password: '' },
     validators: { onBlur: schema, onSubmit: schema },
     onSubmit: async ({ value }) => {
       const error = await signIn(value)
@@ -57,6 +58,18 @@ export function LoginPage() {
           />
         )}
       </form.Field>
+      {/* Mang email đã gõ sang màn quên mật khẩu cho đỡ gõ lại */}
+      <form.Subscribe selector={(s) => s.values.email}>
+        {(email) => (
+          <Link
+            to="/forgot-password"
+            search={{ email: email || undefined }}
+            className="-mt-2 self-end text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            {t('forgot.link')}
+          </Link>
+        )}
+      </form.Subscribe>
 
       <form.Subscribe selector={(s) => s.isSubmitting}>
         {(isSubmitting) => (

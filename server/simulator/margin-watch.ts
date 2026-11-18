@@ -13,14 +13,13 @@ export async function checkMarginCalls(
 ): Promise<void> {
   const { data: accounts, error } = await supabase
     .from('margin_accounts')
-    .select(
-      'id, user_id, initial_rate, call_rate, maintenance_rate, margin_loans(outstanding)',
-    )
+    .select('id, user_id, initial_rate, call_rate, maintenance_rate')
   if (error) throw error
   if (accounts.length === 0) return
 
   const userIds = accounts.map((a) => a.user_id)
-  const [profiles, holdings, openCalls] = await Promise.all([
+  // Nợ lấy từ view margin_loan_balances: gốc còn lại + lãi tạm tính (công thức lãi chỉ nằm ở DB)
+  const [profiles, holdings, openCalls, loans] = await Promise.all([
     supabase.from('profiles').select('id, cash_balance').in('id', userIds),
     supabase
       .from('holdings')
@@ -30,10 +29,24 @@ export async function checkMarginCalls(
       .from('margin_calls')
       .select('id, margin_account_id')
       .eq('status', 'OPEN'),
+    supabase
+      .from('margin_loan_balances')
+      .select('margin_account_id, debt')
+      .gt('debt', 0),
   ])
   if (profiles.error) throw profiles.error
   if (holdings.error) throw holdings.error
   if (openCalls.error) throw openCalls.error
+  if (loans.error) throw loans.error
+
+  const debtByAccount = new Map<number, number>()
+  for (const loan of loans.data) {
+    if (loan.margin_account_id === null) continue
+    debtByAccount.set(
+      loan.margin_account_id,
+      (debtByAccount.get(loan.margin_account_id) ?? 0) + (loan.debt ?? 0),
+    )
+  }
 
   const cash = new Map(profiles.data.map((p) => [p.id, p.cash_balance]))
   const stockValue = new Map<string, number>()
@@ -46,7 +59,7 @@ export async function checkMarginCalls(
   )
 
   for (const account of accounts) {
-    const debt = account.margin_loans.reduce((sum, l) => sum + l.outstanding, 0)
+    const debt = debtByAccount.get(account.id) ?? 0
     const totalAssets =
       (cash.get(account.user_id) ?? 0) + (stockValue.get(account.user_id) ?? 0)
     const rates: MarginRates = {

@@ -34,6 +34,45 @@ export const confirmSchema = (t: TFunction<'auth'>) =>
     accepted: z.literal(true, t('kyc.errors.mustAccept')),
   })
 
+// Hồ sơ: đổi mật khẩu
+export const passwordSchema = (t: TFunction<'auth'>) =>
+  z
+    .object({
+      currentPassword: z.string().min(1, t('errors.passwordRequired')),
+      newPassword: z.string().min(8, t('errors.passwordMin')),
+      confirmPassword: z.string(),
+    })
+    .refine((v) => v.newPassword !== v.currentPassword, {
+      message: t('errors.samePassword'),
+      path: ['newPassword'],
+    })
+    .refine((v) => v.newPassword === v.confirmPassword, {
+      message: t('errors.passwordMismatch'),
+      path: ['confirmPassword'],
+    })
+
+// Quên mật khẩu bước 1: 3 thông tin phải khớp hồ sơ eKYC
+export const forgotInfoSchema = (t: TFunction<'auth'>) =>
+  z.object({
+    email: z.email(t('errors.emailInvalid')),
+    idNumber: z.string().regex(/^\d{12}$/, t('forgot.errors.idNumberInvalid')),
+    phone: z.string().regex(/^0\d{9}$/, t('errors.phoneInvalid')),
+  })
+
+// Quên mật khẩu bước 2: OTP + mật khẩu mới
+export const resetPasswordSchema = (t: TFunction<'auth'>) =>
+  z
+    .object({
+      otp: z.string().regex(/^\d{6}$/, t('forgot.errors.otpFormat')),
+      newPassword: z.string().min(8, t('errors.passwordMin')),
+      confirmPassword: z.string(),
+    })
+    .refine((v) => v.newPassword === v.confirmPassword, {
+      message: t('errors.passwordMismatch'),
+      path: ['confirmPassword'],
+    })
+
 export type LoginValues = z.infer<ReturnType<typeof loginSchema>>
 export type AccountValues = z.infer<ReturnType<typeof accountSchema>>
 export type ConfirmValues = z.infer<ReturnType<typeof confirmSchema>>
+export type ForgotInfoValues = z.infer<ReturnType<typeof forgotInfoSchema>>

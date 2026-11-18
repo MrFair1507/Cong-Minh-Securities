@@ -21,6 +21,11 @@
   --color-danger-bg: var(--danger-bg);
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
+  --color-alloc-1: var(--alloc-1);
+  --color-alloc-2: var(--alloc-2);
+  --color-alloc-3: var(--alloc-3);
+  --color-alloc-4: var(--alloc-4);
+  --color-alloc-5: var(--alloc-5);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -140,15 +145,24 @@
   --price-floor: #0e7490;
 
   /* Trạng thái ký quỹ: an toàn, cảnh báo, nguy hiểm */
-  --safe: #16a34a;
+  /* Đậm một bậc để chữ nhãn trên nền nhạt (bg-*-bg) đạt 4.5:1 */
+  --safe: #15803d;
   --safe-bg: #f0fdf4;
   --warning: #b45309;
   --warning-bg: #fffbeb;
-  --danger: #dc2626;
+  --danger: #b91c1c;
   --danger-bg: #fef2f2;
   /* Thông báo trung tính */
   --info: #2563eb;
   --info-bg: #eff6ff;
+
+  /* Tỷ trọng danh mục: 5 màu phân loại theo thứ tự cố định, đã kiểm mù màu (CVD).
+     Màu chỉ để phân biệt mã, luôn đi kèm tên mã và % ở chú thích. Mã thứ 6 trở đi gộp "Khác" màu xám. */
+  --alloc-1: #2a78d6;
+  --alloc-2: #eb6834;
+  --alloc-3: #1baf7a;
+  --alloc-4: #eda100;
+  --alloc-5: #e87ba4;
 }
 
 /* Theme tối: cùng bộ zinc, đảo sáng tối. Màu giá sáng hơn một bậc để nổi trên nền tối. */
@@ -186,6 +200,12 @@
   --danger-bg: #450a0a;
   --info: #60a5fa;
   --info-bg: #172554;
+
+  --alloc-1: #3987e5;
+  --alloc-2: #d95926;
+  --alloc-3: #199e70;
+  --alloc-4: #c98500;
+  --alloc-5: #d55181;
 
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);

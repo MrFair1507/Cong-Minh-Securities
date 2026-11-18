@@ -44,8 +44,8 @@
       "description": "Tất cả lệnh thị trường đã khớp, mới nhất ở trên"
     },
     "portfolio": {
-      "title": "Danh mục",
-      "description": "Cổ phiếu đang nắm giữ và lãi lỗ tạm tính"
+      "title": "Danh mục đầu tư",
+      "description": "Lãi/lỗ cập nhật theo giá thời gian thực"
     },
     "cash": {
       "title": "Lịch sử dòng tiền",
@@ -53,19 +53,19 @@
     },
     "margin": {
       "title": "Tài khoản ký quỹ",
-      "description": "Tỷ lệ ký quỹ, dư nợ và các khoản vay"
+      "description": "Vay thêm để mua cổ phiếu, theo dõi tỷ lệ ký quỹ và khoản vay"
     },
     "profile": {
       "title": "Hồ sơ cá nhân",
-      "description": "Thông tin tài khoản của bạn"
+      "description": "Thông tin tài khoản, giấy tờ định danh và bảo mật"
     },
     "login": {
       "title": "Đăng nhập",
-      "description": "Đăng nhập để giao dịch với 100 triệu vốn ảo"
+      "description": "Đăng nhập để giao dịch bằng tiền ảo"
     },
     "register": {
       "title": "Đăng ký",
-      "description": "Tạo tài khoản, nhận ngay 100 triệu vốn ảo"
+      "description": "Tạo tài khoản, nạp tiền ảo từ ngân hàng mô phỏng"
     }
   },
   "table": {
@@ -73,5 +73,6 @@
     "previous": "Trước",
     "next": "Sau"
   },
-  "placeholder": "Trang này đang được xây dựng."
+  "placeholder": "Trang này đang được xây dựng.",
+  "amountPlaceholder": "Nhập số tiền"
 }

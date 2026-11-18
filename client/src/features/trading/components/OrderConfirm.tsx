@@ -1,3 +1,4 @@
+import { marginOrderPreview } from '@cms/shared/margin'
 import type { OrderSide } from '@cms/shared/trading'
 import { Info } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -6,6 +7,7 @@ import type { BoardStock } from '@/features/market/api/stocks'
 import { formatPrice, formatVolume } from '@/shared/lib/format'
 import { Button } from '@/shared/ui/button'
 import { placeOrderErrorCode, usePlaceOrder } from '../api/placeOrder'
+import { MarginOrderRows, type OrderMargin } from './MarginOrder'
 import {
   OrderCostRows,
   SIDE_STYLE,
@@ -19,6 +21,7 @@ type OrderConfirmProps = {
   side: OrderSide
   quantity: number
   avgCost?: number
+  margin?: OrderMargin // có khi người dùng bật vay ký quỹ
   onBack: () => void
   onDone: () => void
 }
@@ -29,16 +32,26 @@ export function OrderConfirm({
   side,
   quantity,
   avgCost,
+  margin,
   onBack,
   onDone,
 }: OrderConfirmProps) {
   const { t } = useTranslation('trading')
   const placeOrder = usePlaceOrder()
   const sideText = t(`side.${side}`)
+  const preview = margin
+    ? marginOrderPreview({
+        price: stock.price,
+        quantity,
+        position: margin.position,
+        initialRate: margin.initialRate,
+        loanRate: stock.loan_rate,
+      })
+    : undefined
 
   function submit() {
     placeOrder.mutate(
-      { symbol: stock.symbol, side, quantity },
+      { symbol: stock.symbol, side, quantity, useMargin: Boolean(margin) },
       {
         onSuccess: () => {
           toast.success(
@@ -92,6 +105,13 @@ export function OrderConfirm({
           quantity={quantity}
           avgCost={avgCost}
         />
+        {margin && preview && (
+          <MarginOrderRows
+            preview={preview}
+            pkg={margin.pkg}
+            initialRate={margin.initialRate}
+          />
+        )}
       </SummaryBox>
 
       <p className="flex gap-2 rounded-lg bg-warning-bg p-3 text-xs leading-5 text-warning">

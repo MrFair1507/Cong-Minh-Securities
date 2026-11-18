@@ -4,11 +4,11 @@
 
 ## Bối cảnh
 
-- CMS (Cong Minh Securities): web mô phỏng đầu tư chứng khoán có ký quỹ. Vốn ảo 100 triệu VND, giá do script Node giả lập. Kiến thức ký quỹ chỉ lấy từ nguồn công khai (QĐ 87/QĐ-UBCK).
+- CMS (Cong Minh Securities): web mô phỏng đầu tư chứng khoán có ký quỹ. Tài khoản mới 0 đ, nạp tiền ảo từ ngân hàng mô phỏng (mỗi liên kết 500 triệu, tối đa 2), giá do script Node giả lập. Kiến thức ký quỹ chỉ lấy từ nguồn công khai (QĐ 87/QĐ-UBCK).
 - Phạm vi: 7 nhóm chức năng, 9 trang, 5 hộp thoại. Chỉ lệnh thị trường. Ký quỹ chỉ cảnh báo, không tự bán giải chấp. Vie/EN, chỉ desktop.
 - 9 trang: `/login`, `/register`, `/market?exchange=&sort=&q=` (khách xem được), `/stocks/$symbol`, `/orders?side=&symbol=`, `/portfolio`, `/cash?type=`, `/margin`, `/profile`.
 - 5 hộp thoại: Đặt lệnh (có nhánh vay), Xác nhận lệnh, Mở tài khoản ký quỹ, Trả nợ ký quỹ, Cảnh báo ký quỹ (toast/popup).
-- Luồng demo: đăng nhập → xem giá → đặt lệnh có vay ký quỹ → xem danh mục → giá giảm → nhận cảnh báo → trả nợ.
+- Luồng demo: đăng nhập → liên kết ngân hàng, nạp tiền → xem giá → đặt lệnh có vay ký quỹ → xem danh mục → giá giảm → nhận cảnh báo → trả nợ.
 - Lịch:
   - Tuần 1 (09–15/11): khởi tạo, Supabase, auth, giả lập giá + Realtime, bảng giá, chi tiết mã, RLS.
   - Tuần 2 (16–22/11): đặt lệnh, `place_order`, lịch sử lệnh, danh mục, dòng tiền, ký quỹ.
@@ -47,7 +47,7 @@
 - TanStack Query 5.107 đánh dấu `ensureQueryData` là deprecated: loader dùng `queryClient.query({ ...options, staleTime: 'static' })`.
 - Hoãn deploy Vercel (16/11, chưa đăng nhập được Vercel vì không có điện thoại). Có điện thoại thì làm theo checklist (khoảng 30 phút): Root Directory `client`, env `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `ENABLE_EXPERIMENTAL_COREPACK=1`; Supabase Auth URL Configuration thêm domain Vercel.
 - Còn của tuần 1: xem trên trình duyệt các trang đăng ký, đăng nhập, `/market`, `/stocks/$symbol`, `/profile` (chưa xem lần nào).
-- Kế hoạch tuần 2: `~/.claude/plans/xem-va-len-kec-stateless-falcon.md`. Minh chốt: bán khi còn nợ thì tiền về tiền mặt, tự trả nợ; **có phí 0,15% (mua và bán) + thuế bán 0,1%**; tuần 2 làm cả sửa tên và đặt lại tiền ảo ở `/profile`.
+- Kế hoạch tuần 2: `~/.claude/plans/xem-va-len-kec-stateless-falcon.md`. Minh chốt: bán khi còn nợ thì tiền về tiền mặt, tự trả nợ; **có phí 0,15% (mua và bán) + thuế bán 0,1%**; `/profile` không sửa tên, không đặt lại tài khoản (chốt lại 17–18/11).
 - Xong 16–18/11 (làm ngày 16/11, chưa commit):
   - Migration `trading` đã push: `orders.fee`/`orders.tax`, hàm `fee_rate()`/`sell_tax_rate()`, vá `handle_new_user` (thêm `set search_path = ''` bị mất ở `kyc_profile`), RPC `place_order(p_symbol, p_side, p_quantity) returns bigint` (khóa `profiles for update`, phí/thuế gộp vào dòng BUY/SELL của `cash_transactions`, giá vốn có tính phí mua, bán hết thì xóa holdings; lỗi trả mã trong message: `INVALID_QUANTITY`, `STOCK_NOT_FOUND`, `INSUFFICIENT_CASH`, `INSUFFICIENT_SHARES`, `NOT_AUTHENTICATED`; chỉ `authenticated` được execute). Đã kiểm bằng SQL (transaction tự rollback) và trên trình duyệt.
   - `shared/src/trading.ts` (`@cms/shared/trading`): `FEE_RATE`, `SELL_TAX_RATE`, `orderCost`, `maxBuyQuantity`. Đổi số thì đổi cả hàm SQL.
@@ -79,9 +79,81 @@
     - `api/` gồm `cash.ts`, `banks.ts`, `bankActions.ts`. `lib/cash.ts` gồm `flowTotals` (bỏ INIT), `maskAccount`, `parseMoney`, `depositQrPayload` (`CMS-MOCK|…`, cố ý không theo chuẩn thanh toán thật).
     - Component: `BankParts` (ChoiceCards, AmountField, OtpField, CopyRow), `LinkBankDialog`, `DepositDialog` (tab Nộp nhanh / Chuyển khoản QR, dùng `qrcode.react`), `WithdrawDialog`, `BankAccounts`, `cashColumns`, `pages/CashPage.tsx`.
   - `/cash?type=`. Thêm `shared/components/ConfirmDialog.tsx` và i18n namespace `cash`.
+  - Quy ước: `navigate` chỉ đổi search param (bộ lọc, mở panel) phải có `resetScroll: false`. Router đang bật `scrollRestoration`, thiếu option này thì mỗi lần lọc trang nhảy lên đầu, trông như tải lại. Đã sửa ở `/cash`, `/orders`, `/market`.
   - `shared/lib/numberWords.ts`: `moneyToWords(amount, language)` đọc số tiền thành chữ (vi: "Mười một triệu một trăm nghìn đồng", có linh/lăm/mốt/tư/không trăm/nghìn tỷ; en: "Eleven million one hundred thousand dong"). Hiện dưới ô số tiền của `AmountField` và được gắn vào `aria-describedby`.
   - Tài khoản test có eKYC: `test.bank.<số>@example.com` / `Test@12345` (tạo khi chạy e2e, vài tài khoản; tài khoản cuối là `test.bank.1794820239357@example.com`).
-- Tiếp theo: 19/11 `/portfolio` · 20/11 migration `margin` (`/cash` đã làm sớm) · 21/11 `/margin` + 2 hộp thoại ký quỹ + nhánh vay · 22/11 cảnh báo ký quỹ, demo, `/profile` sửa tên + `reset_account`.
+- Bỏ vốn ban đầu 100 triệu (17/11, chưa commit). Minh chốt: tài khoản mới 0 đ, tự nạp từ ngân hàng ảo.
+  - Migration `no_initial_cash` (Minh đã push + `db:types`): `handle_new_user` không ghi INIT nữa, drop `initial_cash()`. Tài khoản cũ giữ nguyên số dư và dòng INIT; enum/CHECK INIT giữ lại cho dữ liệu cũ. Claude bị chặn quyền `db push`: migration mới Minh tự push.
+  - `CompleteStep` đổi ô "Vốn ảo" thành "Số dư", thêm nút Nạp tiền → `/cash`. i18n vi/en (`auth`, `common`, `trading`) bỏ các câu "100 triệu".
+- Xong `/portfolio` (17/11, kéo sớm việc 18–19/11, chưa commit; frame 06, chi tiết ở `DESIGN.md`). Không cần migration.
+  - `features/portfolio/`: `api/holdings.ts` thêm `holdingsQueryOptions` (key `['holdings', userId, 'all']`, đặt lệnh invalidate `['holdings']` là làm mới). `lib/portfolio.ts` hàm thuần `buildPortfolio`, `allocationSlices` (để viết Vitest tuần 3). `lib/allocationColors.ts`, `components/portfolioColumns.tsx`, `components/AllocationCard.tsx` (shadcn Chart = Recharts 3.8, `shared/ui/chart.tsx`; Recharts cần thêm `react-is` cùng bản React, shadcn không tự cài. Sau khi cài gói mới phải khởi động lại `yarn dev`), `pages/PortfolioPage.tsx`.
+  - Giá hiện tại ghép từ cache `['stocks']` + `useStocksRealtime`. Lãi/lỗ = (giá − giá vốn) × KL, giá vốn đã gồm phí mua; chưa trừ phí/thuế bán (khác dòng "Lãi/lỗ tạm tính" trong hộp thoại bán).
+  - Nút Bán điền sẵn cache `holdingQueryOptions` trước khi mở hộp thoại để không chớp "0 CP".
+  - Token `--alloc-1..5` trong `index.css` (đã chạy bộ kiểm palette: đạt CVD cả sáng/tối). `format.ts` thêm `formatCompact` ("143,6 Tr"). i18n namespace `portfolio`.
+  - Đã xem trên trình duyệt (Playwright, sáng/tối, rê chuột, mở hộp thoại bán). Tài khoản `test.order.…` giờ giữ 700 FPT + 100 ACB + 100 HPG.
+  - Còn khi làm ký quỹ (21/11): thẻ Tiền mặt thêm dư nợ ký quỹ, Tổng tài sản trừ nợ.
+- Xong `/profile` bản đủ (17/11, kéo sớm việc 22/11, chưa commit; frame 09). Minh chốt: **không cho sửa họ tên** (khóa theo eKYC, là tên chủ TK ngân hàng), bỏ ô chọn ngôn ngữ (đã ở menu avatar).
+  - 18/11 Minh chốt: **bỏ hẳn "Đặt lại tài khoản"** (tài khoản tài chính thật không có), đổi mật khẩu không đặt cạnh thông tin cá nhân nữa. Đã xóa migration `reset_account` (chưa từng push), `ResetAccountCard`, `useResetAccount`.
+  - Migration `lock_full_name` (**chưa push, Minh push**): drop policy "Sửa hồ sơ của mình" + `revoke update (full_name)`, client không còn sửa được bảng `profiles`.
+  - Client:
+    - `api/account.ts`: `changePassword` đăng nhập lại bằng mật khẩu hiện tại để kiểm, rồi gọi `updateUser`.
+    - `components/profile/ChangePasswordDialog.tsx`: form nằm trong `DialogContent`, đóng là tự reset.
+    - `Profiles.tsx` kiểu trang cài đặt: lưới `300px | 1fr`, trái thẻ tóm tắt (avatar, tên, email, nhãn eKYC, số TK, ngày mở), phải 3 thẻ danh sách nhãn trái/giá trị phải (Thông tin cá nhân, Giấy tờ định danh, Bảo mật có nút mở hộp thoại Đổi mật khẩu).
+  - Bẫy TanStack Form: validator `onBlur` cả form gắn lỗi cho ô chưa chạm, gõ vào thì lỗi cũ hiện; bấm nút làm ô rời focus → lỗi biến mất → nút nhảy lên → cú bấm trượt. Form đổi mật khẩu, quên mật khẩu dùng `onChange`. Form đăng ký bước 1 (`AccountStep`) cùng mẫu, chưa sửa.
+  - Đã xem trên trình duyệt (18/11, Playwright, sáng/tối): trang Hồ sơ mới, hộp thoại Đổi mật khẩu.
+- Xong quên mật khẩu bằng OTP mô phỏng (18/11, chưa commit). Minh chọn OTP mô phỏng thay vì email Supabase (SMTP mặc định không gửi tới `@example.com`, demo không chắc chạy).
+  - Migration `password_reset` (**chưa push, Minh push rồi `db:types`**; `database.types.ts` đã thêm tay 2 RPC để build qua):
+    - Bảng `password_reset_otps` (client không đọc được): 1 mã/tài khoản, 5 phút, sai 5 lần hủy mã, xin lại cách 60 giây.
+    - `request_password_reset(p_email, p_id_number, p_phone)` (anon gọi được): khớp hồ sơ eKYC thì trả `(code, phone_tail)`, sai báo chung `RESET_INFO_MISMATCH`; xin lại sớm báo `OTP_TOO_SOON`.
+    - `reset_password(p_email, p_code, p_new_password)` trả mã kết quả `OK` / `OTP_INVALID` / `OTP_EXPIRED` / `OTP_LOCKED`, không dùng raise, vì raise hủy transaction làm mất lần đếm sai. Mật khẩu ngắn thì raise `WEAK_PASSWORD`.
+    - Đổi mật khẩu bằng cách ghi thẳng `auth.users.encrypted_password = extensions.crypt(..., gen_salt('bf', 10))` (không có server nên không gọi được Admin API), xóa `auth.sessions` để đăng xuất mọi nơi.
+    - Đã kiểm 14 trường hợp bằng SQL trên cloud (transaction rollback, gọi dưới role `anon`), đã kiểm lại cloud sạch.
+  - Client:
+    - `api/passwordReset.ts`, `schemas.ts` thêm `forgotInfoSchema`, `resetPasswordSchema`.
+    - `components/forgot/ForgotInfoStep.tsx`, `ResetPasswordStep.tsx` (hiện mã mô phỏng SMS, nút Gửi lại mã), `pages/ForgotPasswordPage.tsx`.
+    - Route `/_guest/forgot-password?email=`. Màn đăng nhập có link "Quên mật khẩu?" mang theo email đã gõ. `/login?email=` điền sẵn email sau khi đặt lại xong.
+    - i18n `auth.forgot`.
+  - Minh đã push 2 migration `lock_full_name`, `password_reset` và chạy `db:types` (18/11). Chưa chạy thử luồng quên mật khẩu trên giao diện.
+- Ký quỹ (18/11, làm dồn trong 1 ngày, chưa commit; kế hoạch `~/.claude/plans/k-ho-ch-cho-ph-n-lexical-quokka.md`).
+  - Nguồn nghiệp vụ: Figma frame 08/10/12/13/14 + các file mẫu Minh gửi. Từ file mẫu chỉ lấy khái niệm chung (gói vay, kích hoạt dịch vụ, gia hạn, danh mục mã, minh họa khoản vay, khuôn tab + `renderTabContent()`). Tên gói, số liệu là của CMS, không chép code. Không làm: giải chấp, tiểu khoản.
+  - Minh chốt:
+    - Lãi theo ngày lịch giờ VN, tính cả ngày vay.
+    - Thu nợ tự động cuối phiên (lãi trước rồi gốc, khoản cũ nhất trước), vẫn có trả nợ chủ động. Bán khi còn nợ thì tiền về tiền mặt.
+    - Đăng ký gói duyệt ngay.
+  - Migration `margin` (đã push; còn chạy `db:types` thay cho `database.types.ts` đã thêm tay).
+    - Gói: `margin_packages` (BASIC 13% · PREFERRED 9,5% rổ 8 mã ACB/BID/CTG/FPT/HPG/MBB/VCB/VNM · TIERED bậc 0/10/12/14% theo ngày 1–7/8–30/31–60/61+), hạn 90 ngày, PREFERRED và TIERED loại trừ nhau. Bảng `margin_package_tiers`, `margin_package_stocks` (seed.sql cũng chèn rổ).
+    - `margin_accounts` thêm `package_code`, `auto_repay`, `auto_renew`.
+    - `margin_loans` thêm `package_code`, `interest_rate`, `accrued_interest`, `interest_paid`, `loan_date`, `interest_from`, `due_date`, `renew_count`.
+    - `margin_service_events` là lịch sử dịch vụ.
+    - Lãi: `loan_interest()` cộng lãi từng ngày rồi mới làm tròn. View `margin_loan_balances` (`security_invoker`) có `interest_due`, `debt`, `status` ACTIVE/OVERDUE/PAID. Client và simulator đều đọc view này.
+    - RPC: `open_margin_account`, `update_margin_settings`, `register_margin_package` (lỗi `PACKAGE_CONFLICT`), `cancel_margin_package`, `repay_margin_loan`, `renew_margin_loan` (còn ≤ 10 ngày tới hạn, tối đa 2 lần, tỷ lệ ≥ ngưỡng cảnh báo).
+    - `place_order(..., p_use_margin default false)`: vay đúng phần thiếu. Lỗi `MARGIN_ACCOUNT_REQUIRED`, `LOAN_OVERDUE`, `STOCK_NOT_MARGINABLE`, `LOAN_LIMIT_EXCEEDED`, `MARGIN_RATIO_TOO_LOW`. Ưu đãi mà mã ngoài rổ thì áp dụng gói Cơ bản.
+    - `end_session_margin()` chỉ `service_role` gọi được, simulator gọi mỗi lần sang phiên (cả phiên nhanh).
+    - Đã kiểm 36 ca bằng SQL trên cloud (transaction rollback, role `authenticated`/`anon`), cloud sạch sau khi kiểm.
+  - `shared/src/margin.ts`:
+    - `marginStatus` thêm `WATCH`.
+    - Thêm `packageInterest`, `marginOrderPreview`, `maxMarginOrderValue`, `maxMarginBuyQuantity`, `marginBuyingPower`, `repayToReach`, `renewError`, `illustrateLoan` (có tính phí/thuế), `daysBetween`.
+    - Bỏ `loanAmount`.
+  - Client `features/margin/`:
+    - `api/margin.ts`: các query key `['margin', userId, …]`, `['margin-packages']`. `api/marginActions.ts`.
+    - `hooks/useMarginSummary.ts`: dùng chung cho `/margin`, đặt lệnh, `/portfolio`, cảnh báo.
+    - `lib/` gồm `packages.ts`, `dates.ts` (`vnToday`, `addDays`, `loanCode`), `status.ts`, `tabs.ts`.
+    - `components/`: `overview/`, `activation/`, `loans/` (`RepayDialog`, `RenewDialog`), `packages/`, `stocks/`, `illustration/`, `history/`, `MarginCallDialog`, `MarginCallWatcher` (gắn ở `_app/_authed`, Realtime `margin_calls`; toast nhớ id trong `sessionStorage`).
+    - `pages/MarginPage.tsx`: `/margin?tab=overview|stocks|illustration|history&repay=true`.
+    - Làm lại giao diện 18/11 (skill evon:ui-ux, phương án A, chi tiết ở DESIGN.md):
+      - Bỏ tab Gói vay. Gói vay là 3 ô trong Tổng quan (`packages/PackageTiles`); bấm ô mở `PackageDialog`; đăng ký / hủy / xung đột ở `usePackageActions`. Số ví dụ tính ở `lib/packageExample.ts`.
+      - `overview/MarginHero` gộp tỷ lệ, dư nợ, nút Trả nợ và 2 công tắc cài đặt. Đã xóa `MarginRatioCard`, `MarginSettingsCard`, `PackagesTab`.
+      - Token `--safe`, `--danger` (nền sáng) đậm một bậc.
+      - Đã xem bằng Playwright cả sáng lẫn tối. Tài khoản test `test.bank.…` đã mở tài khoản ký quỹ, gói Cơ bản, chưa có khoản vay.
+  - Đặt lệnh:
+    - `MarginOrder.tsx`: công tắc vay, các dòng vay, dòng kết luận.
+    - `OrderSteps` ghép `OrderMargin`, `placeOrder` thêm `useMargin`.
+    - `BOARD_FIELDS` thêm `loan_rate`.
+  - Dời `AmountField` sang `shared/components/AmountField.tsx`, `parseMoney`/`formatMoneyInput` sang `shared/lib/money.ts` (cash vẫn re-export). `format.ts` thêm `formatRate` ("40%", "9,5%"). Thêm shadcn `switch`.
+  - `/portfolio`: khi có nợ thì Tổng tài sản ghi tài sản ròng, Tiền mặt ghi dư nợ (link `/margin`).
+  - Simulator: `margin-watch.ts` đọc nợ từ view, `startSession` gọi `end_session_margin`.
+  - Migration `margin` đã push.
+- Tiếp theo: `db:types` (Minh) → chạy Playwright luồng demo (nạp tiền → mở TK ký quỹ → mua có vay → `--trend=down --session=60` → cảnh báo → trả nợ → thu nợ cuối phiên) → tuần 3 (Vitest, báo cáo).
 - Yarn 1 global đã gỡ; corepack đã bật không cần admin bằng `corepack enable --install-directory "%APPDATA%\npm" yarn`. Gõ `yarn` trực tiếp là ra 4.18.1 (terminal mở trước khi sửa thì mở lại).
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.
 - Biến môi trường:

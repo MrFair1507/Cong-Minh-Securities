@@ -37,7 +37,12 @@ export function MarketPage() {
   // Mọi bộ lọc ghi lên URL (replace: không làm dày lịch sử trình duyệt)
   const updateSearch = useCallback(
     (patch: Partial<MarketSearch>) => {
-      navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true })
+      // resetScroll: false - đổi bộ lọc hay mở panel không làm trang nhảy lên đầu
+      navigate({
+        search: (prev) => ({ ...prev, ...patch }),
+        replace: true,
+        resetScroll: false,
+      })
     },
     [navigate],
   )

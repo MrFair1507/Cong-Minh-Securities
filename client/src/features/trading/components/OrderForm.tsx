@@ -1,3 +1,8 @@
+import {
+  marginOrderPreview,
+  maxMarginBuyQuantity,
+  maxMarginOrderValue,
+} from '@cms/shared/margin'
 import { maxBuyQuantity, type OrderSide } from '@cms/shared/trading'
 import { useForm, useStore } from '@tanstack/react-form'
 import { cn } from 'cn'
@@ -20,6 +25,12 @@ import {
   stepQuantity,
 } from '../lib/order'
 import { ORDER_SIDES, orderFormSchema } from '../schemas'
+import {
+  MarginOrderRows,
+  MarginToggle,
+  MarginVerdict,
+  type OrderMargin,
+} from './MarginOrder'
 import { OrderCostRows, SIDE_STYLE, SummaryBox } from './OrderSummary'
 import { StepFooter, StepHeader, useOrderSurface } from './OrderSurface'
 
@@ -34,6 +45,9 @@ type OrderFormProps = {
   cash: number // tiền mặt hiện có
   held: number // số cổ phiếu đang giữ của mã này
   avgCost?: number // giá vốn của mã này, để tính lãi/lỗ khi bán
+  margin: OrderMargin
+  useMargin: boolean // đang bật vay (đã xét có tài khoản ký quỹ, mã cho vay, chiều mua)
+  onUseMarginChange: (value: boolean) => void
   onCancel: () => void
   onContinue: (quantity: number) => void
 }
@@ -47,6 +61,9 @@ export function OrderForm({
   cash,
   held,
   avgCost,
+  margin,
+  useMargin,
+  onUseMarginChange,
   onCancel,
   onContinue,
 }: OrderFormProps) {
@@ -66,10 +83,29 @@ export function OrderForm({
   const quantity = parseQuantity(
     useStore(form.store, (state) => state.values.quantity),
   )
-  const max =
-    side === 'BUY' ? maxBuyQuantity(cash, stock.price, LOT_SIZE) : held
+  const marginInput = {
+    position: margin.position,
+    initialRate: margin.initialRate,
+    loanRate: stock.loan_rate,
+  }
+  let max = held
+  if (side === 'BUY') {
+    max = useMargin
+      ? maxMarginBuyQuantity({
+          ...marginInput,
+          price: stock.price,
+          lot: LOT_SIZE,
+        })
+      : maxBuyQuantity(cash, stock.price, LOT_SIZE)
+  }
   const exceeds = quantity > max
-  const canContinue = isLotQuantity(quantity) && !exceeds
+  const preview =
+    useMargin && quantity > 0
+      ? marginOrderPreview({ ...marginInput, price: stock.price, quantity })
+      : undefined
+  const canContinue = isLotQuantity(quantity) && !exceeds && !preview?.error
+  const showMarginPower =
+    side === 'BUY' && margin.hasAccount && stock.loan_rate > 0
   const tone = toneClass(stock.price, stock)
 
   function setQuantity(value: number) {
@@ -241,6 +277,20 @@ export function OrderForm({
               : t('dialog.sellableValue', { quantity: formatVolume(held) })}
           </dd>
         </div>
+        {showMarginPower && (
+          <div className="flex items-baseline justify-between gap-4">
+            <dt className="text-muted-foreground">{t('margin.buyingPower')}</dt>
+            <dd className="font-semibold">
+              {formatMoney(
+                maxMarginOrderValue(
+                  margin.position,
+                  margin.initialRate,
+                  stock.loan_rate,
+                ),
+              )}
+            </dd>
+          </div>
+        )}
         <div className="flex items-baseline justify-between gap-4">
           <dt className="text-muted-foreground">{t('dialog.maxQuantity')}</dt>
           <dd className="font-semibold">
@@ -249,6 +299,15 @@ export function OrderForm({
         </div>
       </dl>
 
+      {side === 'BUY' && (
+        <MarginToggle
+          margin={margin}
+          loanRate={stock.loan_rate}
+          checked={useMargin}
+          onCheckedChange={onUseMarginChange}
+        />
+      )}
+
       <SummaryBox>
         <OrderCostRows
           side={side}
@@ -256,7 +315,17 @@ export function OrderForm({
           quantity={quantity}
           avgCost={avgCost}
         />
+        {preview && (
+          <MarginOrderRows
+            preview={preview}
+            pkg={margin.pkg}
+            initialRate={margin.initialRate}
+          />
+        )}
       </SummaryBox>
+      {preview && preview.loan > 0 && (
+        <MarginVerdict preview={preview} initialRate={margin.initialRate} />
+      )}
 
       <StepFooter>
         <Button type="button" variant="outline" size="lg" onClick={onCancel}>

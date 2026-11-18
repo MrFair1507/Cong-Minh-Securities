@@ -1,0 +1,819 @@
+-- CMS: giao dịch ký quỹ.
+-- Gói vay (Cơ bản / Ưu đãi / Bậc thang), lãi tính theo ngày, hạn vay và gia hạn,
+-- vay khi mua (place_order), trả nợ chủ động, thu nợ và gia hạn tự động cuối phiên, lịch sử dịch vụ.
+-- Khái niệm theo quy chế công khai (QĐ 87/QĐ-UBCK). Tên gói và số liệu là của CMS.
+-- Chỉ cảnh báo khi tỷ lệ thấp (simulator tạo margin_calls), không tự bán giải chấp.
+
+-- ============================================================
+-- Ngày hôm nay theo giờ Việt Nam: lãi, hạn vay đều đếm theo ngày lịch VN
+-- ============================================================
+create function public.vn_today()
+returns date
+language sql
+stable
+set search_path = ''
+as $$
+  select (now() at time zone 'Asia/Ho_Chi_Minh')::date;
+$$;
+
+-- Tỷ lệ ký quỹ = (tài sản − nợ) / tài sản, khớp marginRatio() trong shared/margin.ts
+create function public.margin_ratio(p_assets numeric, p_debt numeric)
+returns numeric
+language sql
+immutable
+set search_path = ''
+as $$
+  select case
+    when p_debt <= 0 then 1
+    when p_assets <= 0 then 0
+    else (p_assets - p_debt) / p_assets
+  end;
+$$;
+
+-- ============================================================
+-- Gói vay. Cơ bản luôn có (mặc định). Ưu đãi và Bậc thang loại trừ nhau (exclusive).
+-- interest_rate null nghĩa là lãi theo bậc (bảng margin_package_tiers).
+-- ============================================================
+create table public.margin_packages (
+  code text primary key check (code in ('BASIC', 'PREFERRED', 'TIERED')),
+  interest_rate numeric(6, 4) check (interest_rate between 0 and 1),
+  term_days integer not null check (term_days > 0),
+  exclusive boolean not null default false,
+  sort_order integer not null
+);
+
+insert into public.margin_packages (code, interest_rate, term_days, exclusive, sort_order) values
+  ('BASIC', 0.13, 90, false, 1),
+  ('PREFERRED', 0.095, 90, true, 2),
+  ('TIERED', null, 90, true, 3);
+
+-- Bậc lãi theo số thứ tự ngày vay (ngày vay là ngày 1). to_day null: từ đó trở đi.
+create table public.margin_package_tiers (
+  package_code text not null references public.margin_packages (code) on delete cascade,
+  from_day integer not null check (from_day >= 1),
+  to_day integer check (to_day is null or to_day >= from_day),
+  annual_rate numeric(6, 4) not null check (annual_rate between 0 and 1),
+  primary key (package_code, from_day)
+);
+
+insert into public.margin_package_tiers (package_code, from_day, to_day, annual_rate) values
+  ('TIERED', 1, 7, 0),
+  ('TIERED', 8, 30, 0.10),
+  ('TIERED', 31, 60, 0.12),
+  ('TIERED', 61, null, 0.14);
+
+-- Rổ mã của gói Ưu đãi. Mua mã ngoài rổ thì khoản vay áp dụng gói Cơ bản.
+create table public.margin_package_stocks (
+  package_code text not null references public.margin_packages (code) on delete cascade,
+  stock_id bigint not null references public.stocks (id) on delete cascade,
+  primary key (package_code, stock_id)
+);
+
+-- seed.sql cũng chèn lại rổ này (chạy sau migration khi reset DB cục bộ)
+insert into public.margin_package_stocks (package_code, stock_id)
+select 'PREFERRED', id from public.stocks
+where symbol in ('ACB', 'BID', 'CTG', 'FPT', 'HPG', 'MBB', 'VCB', 'VNM')
+on conflict do nothing;
+
+-- ============================================================
+-- Tài khoản ký quỹ: gói đang dùng, tự trả nợ, tự gia hạn
+-- ============================================================
+alter table public.margin_accounts
+  add column package_code text not null default 'BASIC' references public.margin_packages (code),
+  add column auto_repay boolean not null default true,
+  add column auto_renew boolean not null default true;
+
+-- ============================================================
+-- Khoản vay: gói và lãi suất chốt lúc vay, lãi đã chốt/đã trả, hạn vay.
+-- Lãi chưa chốt = lãi trên outstanding từ interest_from tới hôm nay (tính cả hai đầu).
+-- Mỗi lần trả nợ thì chốt lãi tới hết hôm nay và dời interest_from sang ngày mai.
+-- ============================================================
+alter table public.margin_loans
+  add column package_code text not null default 'BASIC' references public.margin_packages (code),
+  add column interest_rate numeric(6, 4) check (interest_rate between 0 and 1),
+  add column accrued_interest numeric(18, 2) not null default 0 check (accrued_interest >= 0),
+  add column interest_paid numeric(18, 2) not null default 0 check (interest_paid >= 0),
+  add column loan_date date not null default public.vn_today(),
+  add column interest_from date not null default public.vn_today(),
+  add column due_date date not null default public.vn_today() + 90,
+  add column renew_count integer not null default 0 check (renew_count between 0 and 2);
+
+-- ============================================================
+-- Lịch sử dịch vụ ký quỹ (mở tài khoản, đổi cài đặt, đăng ký/hủy gói, gia hạn)
+-- ============================================================
+create table public.margin_service_events (
+  id bigint generated by default as identity primary key,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  type text not null check (
+    type in ('OPEN', 'SETTINGS', 'REGISTER_PACKAGE', 'CANCEL_PACKAGE', 'RENEW_LOAN', 'AUTO_RENEW')
+  ),
+  package_code text references public.margin_packages (code),
+  margin_loan_id bigint references public.margin_loans (id) on delete cascade,
+  auto_repay boolean,
+  auto_renew boolean,
+  due_date date, -- hạn mới sau khi gia hạn
+  created_at timestamptz not null default now()
+);
+create index margin_service_events_user_id_idx on public.margin_service_events (user_id, id desc);
+create index margin_service_events_loan_id_idx on public.margin_service_events (margin_loan_id);
+
+-- ============================================================
+-- Lãi
+-- ============================================================
+
+-- Lãi suất năm của ngày thứ p_day: gói lãi cố định dùng p_rate, gói bậc thang tra bảng bậc
+create function public.loan_annual_rate(p_package_code text, p_rate numeric, p_day integer)
+returns numeric
+language sql
+stable
+set search_path = ''
+as $$
+  select coalesce(
+    p_rate,
+    (
+      select t.annual_rate from public.margin_package_tiers t
+      where t.package_code = p_package_code
+        and p_day >= t.from_day
+        and (t.to_day is null or p_day <= t.to_day)
+    ),
+    0
+  );
+$$;
+
+-- Lãi của số dư p_outstanding từ ngày p_from tới p_to (tính cả hai đầu), làm tròn tới đồng.
+-- Khớp packageInterest() trong shared/margin.ts.
+create function public.loan_interest(
+  p_outstanding numeric,
+  p_package_code text,
+  p_rate numeric,
+  p_loan_date date,
+  p_from date,
+  p_to date
+)
+returns numeric
+language sql
+stable
+set search_path = ''
+as $$
+  select coalesce(
+    round(sum(
+      p_outstanding * public.loan_annual_rate(p_package_code, p_rate, (d::date - p_loan_date) + 1) / 365
+    )),
+    0
+  )
+  from generate_series(p_from, p_to, interval '1 day') as d;
+$$;
+
+-- Số dư từng khoản vay kèm lãi tạm tính. Client và simulator đều đọc view này.
+-- security_invoker: người dùng chỉ thấy khoản vay của mình (RLS của các bảng gốc).
+create view public.margin_loan_balances
+with (security_invoker = on)
+as
+select
+  l.id,
+  l.margin_account_id,
+  a.user_id,
+  l.order_id,
+  o.quantity as order_quantity,
+  s.symbol,
+  l.package_code,
+  l.interest_rate,
+  l.principal,
+  l.outstanding,
+  l.interest_paid,
+  i.interest_due,
+  l.outstanding + i.interest_due as debt,
+  l.loan_date,
+  l.due_date,
+  l.renew_count,
+  case
+    when l.outstanding = 0 then 'PAID'
+    when l.due_date < public.vn_today() then 'OVERDUE'
+    else 'ACTIVE'
+  end as status,
+  l.created_at
+from public.margin_loans l
+join public.margin_accounts a on a.id = l.margin_account_id
+join public.orders o on o.id = l.order_id
+join public.stocks s on s.id = o.stock_id
+cross join lateral (
+  select l.accrued_interest + public.loan_interest(
+    l.outstanding, l.package_code, l.interest_rate, l.loan_date, l.interest_from, public.vn_today()
+  ) as interest_due
+) i;
+
+-- ============================================================
+-- Hàm nội bộ (client không gọi được)
+-- ============================================================
+
+-- Tiền mặt, giá trị cổ phiếu theo giá hiện tại, tổng nợ (gốc + lãi tạm tính)
+create function public.margin_position(
+  p_user_id uuid,
+  out cash numeric,
+  out stock_value numeric,
+  out debt numeric
+)
+language sql
+stable
+set search_path = ''
+as $$
+  select
+    coalesce((select p.cash_balance from public.profiles p where p.id = p_user_id), 0),
+    coalesce((
+      select sum(h.quantity * s.price)
+      from public.holdings h
+      join public.stocks s on s.id = h.stock_id
+      where h.user_id = p_user_id
+    ), 0),
+    coalesce((
+      select sum(b.debt) from public.margin_loan_balances b where b.user_id = p_user_id
+    ), 0);
+$$;
+
+-- Trả p_amount cho một khoản vay: chốt lãi, trừ lãi trước rồi tới gốc, ghi dòng REPAY.
+-- Người gọi đã kiểm 0 < p_amount ≤ nợ và tiền mặt đủ, và đã khóa dòng profiles.
+create function public.apply_repayment(p_loan_id bigint, p_amount numeric)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_loan public.margin_loans;
+  v_user_id uuid;
+  v_today date := public.vn_today();
+  v_interest numeric(18, 2);
+  v_pay_interest numeric(18, 2);
+  v_pay_principal numeric(18, 2);
+  v_cash numeric(18, 2);
+begin
+  select l.* into v_loan from public.margin_loans l where l.id = p_loan_id for update;
+  select a.user_id into v_user_id from public.margin_accounts a where a.id = v_loan.margin_account_id;
+
+  v_interest := v_loan.accrued_interest + public.loan_interest(
+    v_loan.outstanding, v_loan.package_code, v_loan.interest_rate,
+    v_loan.loan_date, v_loan.interest_from, v_today
+  );
+  v_pay_interest := least(p_amount, v_interest);
+  v_pay_principal := least(p_amount - v_pay_interest, v_loan.outstanding);
+
+  update public.margin_loans
+  set accrued_interest = v_interest - v_pay_interest,
+      interest_paid = interest_paid + v_pay_interest,
+      outstanding = outstanding - v_pay_principal,
+      interest_from = greatest(interest_from, v_today + 1)
+  where id = p_loan_id;
+
+  update public.profiles
+  set cash_balance = cash_balance - (v_pay_interest + v_pay_principal)
+  where id = v_user_id
+  returning cash_balance into v_cash;
+
+  insert into public.cash_transactions (user_id, type, amount, balance_after, margin_loan_id)
+  values (v_user_id, 'REPAY', -(v_pay_interest + v_pay_principal), v_cash, p_loan_id);
+end;
+$$;
+
+-- Gia hạn một khoản vay: còn ≤ 10 ngày tới hạn, tối đa 2 lần, tỷ lệ ký quỹ ≥ ngưỡng cảnh báo.
+-- Mỗi lần cộng thêm term_days của gói. p_type: RENEW_LOAN (người dùng) hoặc AUTO_RENEW.
+create function public.renew_loan_internal(p_loan_id bigint, p_type text)
+returns date
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_loan public.margin_loan_balances;
+  v_account public.margin_accounts;
+  v_pos record;
+  v_term integer;
+  v_new_due date;
+begin
+  select b.* into v_loan from public.margin_loan_balances b where b.id = p_loan_id;
+  if not found then
+    raise exception 'LOAN_NOT_FOUND';
+  end if;
+  if v_loan.outstanding <= 0 then
+    raise exception 'LOAN_PAID';
+  end if;
+  if v_loan.due_date - public.vn_today() > 10 then
+    raise exception 'RENEW_TOO_EARLY';
+  end if;
+  if v_loan.renew_count >= 2 then
+    raise exception 'RENEW_LIMIT';
+  end if;
+
+  select a.* into v_account from public.margin_accounts a where a.id = v_loan.margin_account_id;
+  select * into v_pos from public.margin_position(v_account.user_id);
+  if public.margin_ratio(v_pos.cash + v_pos.stock_value, v_pos.debt) < v_account.call_rate then
+    raise exception 'MARGIN_RATIO_TOO_LOW';
+  end if;
+
+  select p.term_days into v_term from public.margin_packages p where p.code = v_loan.package_code;
+
+  update public.margin_loans
+  set due_date = due_date + v_term,
+      renew_count = renew_count + 1
+  where id = p_loan_id
+  returning due_date into v_new_due;
+
+  insert into public.margin_service_events (user_id, type, package_code, margin_loan_id, due_date)
+  values (v_account.user_id, p_type, v_loan.package_code, p_loan_id, v_new_due);
+
+  return v_new_due;
+end;
+$$;
+
+-- ============================================================
+-- RPC cho người dùng
+-- ============================================================
+
+-- Mở tài khoản ký quỹ (cần eKYC), kèm 2 tùy chọn dịch vụ
+create function public.open_margin_account(
+  p_auto_repay boolean default true,
+  p_auto_renew boolean default true
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_account_id bigint;
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+  perform 1 from public.profiles where id = v_user_id and kyc_verified_at is not null for update;
+  if not found then
+    raise exception 'KYC_REQUIRED';
+  end if;
+  if exists (select 1 from public.margin_accounts where user_id = v_user_id) then
+    raise exception 'MARGIN_ACCOUNT_EXISTS';
+  end if;
+
+  insert into public.margin_accounts (user_id, auto_repay, auto_renew)
+  values (v_user_id, coalesce(p_auto_repay, true), coalesce(p_auto_renew, true))
+  returning id into v_account_id;
+
+  insert into public.margin_service_events (user_id, type, package_code, auto_repay, auto_renew)
+  values (v_user_id, 'OPEN', 'BASIC', coalesce(p_auto_repay, true), coalesce(p_auto_renew, true));
+
+  return v_account_id;
+end;
+$$;
+
+-- Bật/tắt tự trả nợ, tự gia hạn
+create function public.update_margin_settings(p_auto_repay boolean, p_auto_renew boolean)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+  if p_auto_repay is null or p_auto_renew is null then
+    raise exception 'INVALID_SETTINGS';
+  end if;
+
+  update public.margin_accounts
+  set auto_repay = p_auto_repay, auto_renew = p_auto_renew
+  where user_id = v_user_id;
+  if not found then
+    raise exception 'MARGIN_ACCOUNT_REQUIRED';
+  end if;
+
+  insert into public.margin_service_events (user_id, type, auto_repay, auto_renew)
+  values (v_user_id, 'SETTINGS', p_auto_repay, p_auto_renew);
+end;
+$$;
+
+-- Đăng ký gói (duyệt ngay). Đang dùng một gói loại trừ khác thì phải hủy gói đó trước.
+-- Chỉ áp dụng cho khoản vay mới, khoản vay cũ giữ gói lúc vay.
+create function public.register_margin_package(p_code text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_account public.margin_accounts;
+  v_current public.margin_packages;
+  v_new public.margin_packages;
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+
+  select a.* into v_account from public.margin_accounts a where a.user_id = v_user_id for update;
+  if not found then
+    raise exception 'MARGIN_ACCOUNT_REQUIRED';
+  end if;
+
+  select p.* into v_new from public.margin_packages p where p.code = p_code;
+  if not found or v_new.code = 'BASIC' then
+    raise exception 'INVALID_PACKAGE';
+  end if;
+  if v_account.package_code = v_new.code then
+    raise exception 'PACKAGE_ALREADY_ACTIVE';
+  end if;
+
+  select p.* into v_current from public.margin_packages p where p.code = v_account.package_code;
+  if v_current.exclusive and v_new.exclusive then
+    raise exception 'PACKAGE_CONFLICT';
+  end if;
+
+  update public.margin_accounts set package_code = v_new.code where id = v_account.id;
+  insert into public.margin_service_events (user_id, type, package_code)
+  values (v_user_id, 'REGISTER_PACKAGE', v_new.code);
+end;
+$$;
+
+-- Hủy gói đang dùng, quay về gói Cơ bản
+create function public.cancel_margin_package()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_account public.margin_accounts;
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+
+  select a.* into v_account from public.margin_accounts a where a.user_id = v_user_id for update;
+  if not found then
+    raise exception 'MARGIN_ACCOUNT_REQUIRED';
+  end if;
+  if v_account.package_code = 'BASIC' then
+    raise exception 'NO_ACTIVE_PACKAGE';
+  end if;
+
+  update public.margin_accounts set package_code = 'BASIC' where id = v_account.id;
+  insert into public.margin_service_events (user_id, type, package_code)
+  values (v_user_id, 'CANCEL_PACKAGE', v_account.package_code);
+end;
+$$;
+
+-- Trả nợ chủ động một khoản vay (lãi trước, gốc sau)
+create function public.repay_margin_loan(p_loan_id bigint, p_amount numeric)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_cash numeric(18, 2);
+  v_debt numeric(18, 2);
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+  if p_amount is null or p_amount <= 0 or p_amount <> trunc(p_amount) then
+    raise exception 'INVALID_AMOUNT';
+  end if;
+
+  -- Thứ tự khóa giống mọi RPC: profiles trước
+  select cash_balance into v_cash from public.profiles where id = v_user_id for update;
+
+  select b.debt into v_debt
+  from public.margin_loan_balances b
+  where b.id = p_loan_id and b.user_id = v_user_id;
+  if not found then
+    raise exception 'LOAN_NOT_FOUND';
+  end if;
+  if p_amount > v_debt then
+    raise exception 'REPAY_EXCEEDS_DEBT';
+  end if;
+  if p_amount > v_cash then
+    raise exception 'INSUFFICIENT_CASH';
+  end if;
+
+  perform public.apply_repayment(p_loan_id, p_amount);
+end;
+$$;
+
+-- Gia hạn chủ động
+create function public.renew_margin_loan(p_loan_id bigint)
+returns date
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+  perform 1 from public.profiles where id = v_user_id for update;
+
+  if not exists (
+    select 1 from public.margin_loans l
+    join public.margin_accounts a on a.id = l.margin_account_id
+    where l.id = p_loan_id and a.user_id = v_user_id
+  ) then
+    raise exception 'LOAN_NOT_FOUND';
+  end if;
+
+  return public.renew_loan_internal(p_loan_id, 'RENEW_LOAN');
+end;
+$$;
+
+-- ============================================================
+-- place_order: thêm nhánh vay ký quỹ (p_use_margin).
+-- Mua mà tiền mặt thiếu thì vay đúng phần thiếu (gồm cả phí). Điều kiện:
+--   có tài khoản ký quỹ, không có khoản vay quá hạn, mã cho vay (loan_rate > 0),
+--   tiền vay ≤ giá trị lệnh × loan_rate, tỷ lệ ký quỹ sau lệnh ≥ initial_rate.
+-- Gói áp dụng: gói đang dùng; đang dùng Ưu đãi mà mã ngoài rổ thì áp dụng Cơ bản.
+-- Ghi LOAN trước rồi BUY để balance_after không âm. Nhánh bán giữ nguyên.
+-- ============================================================
+drop function public.place_order(text, public.order_side, integer);
+
+create function public.place_order(
+  p_symbol text,
+  p_side public.order_side,
+  p_quantity integer,
+  p_use_margin boolean default false
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_today date := public.vn_today();
+  v_stock_id bigint;
+  v_price numeric(18, 2);
+  v_loan_rate numeric(6, 4);
+  v_cash numeric(18, 2);
+  v_held integer;
+  v_value numeric(18, 2);
+  v_fee numeric(18, 2);
+  v_tax numeric(18, 2) := 0;
+  v_amount numeric(18, 2); -- tiền vào (+) hoặc ra (-) tài khoản
+  v_order_id bigint;
+  v_loan numeric(18, 2) := 0;
+  v_loan_id bigint;
+  v_account public.margin_accounts;
+  v_pos record;
+  v_package text;
+  v_rate numeric(6, 4);
+  v_term integer;
+begin
+  if v_user_id is null then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+  if p_quantity is null or p_quantity <= 0 or p_quantity % 100 <> 0 then
+    raise exception 'INVALID_QUANTITY';
+  end if;
+
+  select id, price, loan_rate into v_stock_id, v_price, v_loan_rate
+  from public.stocks
+  where symbol = upper(p_symbol);
+  if not found then
+    raise exception 'STOCK_NOT_FOUND';
+  end if;
+
+  -- Khóa dòng số dư: hai lệnh gửi cùng lúc phải chờ nhau, không tiêu trùng tiền
+  select cash_balance into v_cash
+  from public.profiles
+  where id = v_user_id
+  for update;
+  if not found then
+    raise exception 'NOT_AUTHENTICATED';
+  end if;
+
+  v_value := v_price * p_quantity;
+  v_fee := round(v_value * public.fee_rate());
+
+  if p_side = 'BUY' then
+    v_amount := -(v_value + v_fee);
+
+    if v_cash + v_amount < 0 then
+      if not coalesce(p_use_margin, false) then
+        raise exception 'INSUFFICIENT_CASH';
+      end if;
+
+      select a.* into v_account from public.margin_accounts a where a.user_id = v_user_id;
+      if not found then
+        raise exception 'MARGIN_ACCOUNT_REQUIRED';
+      end if;
+      if exists (
+        select 1 from public.margin_loan_balances b
+        where b.user_id = v_user_id and b.status = 'OVERDUE'
+      ) then
+        raise exception 'LOAN_OVERDUE';
+      end if;
+      if v_loan_rate <= 0 then
+        raise exception 'STOCK_NOT_MARGINABLE';
+      end if;
+
+      v_loan := -(v_cash + v_amount); -- phần thiếu
+      if v_loan > v_value * v_loan_rate then
+        raise exception 'LOAN_LIMIT_EXCEEDED';
+      end if;
+
+      -- Sau lệnh: tiền mặt về 0, cổ phiếu thêm giá trị lệnh, nợ thêm khoản vay
+      select * into v_pos from public.margin_position(v_user_id);
+      if public.margin_ratio(v_pos.stock_value + v_value, v_pos.debt + v_loan)
+        < v_account.initial_rate then
+        raise exception 'MARGIN_RATIO_TOO_LOW';
+      end if;
+
+      v_package := v_account.package_code;
+      if v_package = 'PREFERRED' and not exists (
+        select 1 from public.margin_package_stocks ps
+        where ps.package_code = 'PREFERRED' and ps.stock_id = v_stock_id
+      ) then
+        v_package := 'BASIC';
+      end if;
+      select p.interest_rate, p.term_days into v_rate, v_term
+      from public.margin_packages p
+      where p.code = v_package;
+    end if;
+  else
+    select quantity into v_held
+    from public.holdings
+    where user_id = v_user_id and stock_id = v_stock_id
+    for update;
+    if coalesce(v_held, 0) < p_quantity then
+      raise exception 'INSUFFICIENT_SHARES';
+    end if;
+    v_tax := round(v_value * public.sell_tax_rate());
+    v_amount := v_value - v_fee - v_tax;
+  end if;
+
+  insert into public.orders (user_id, stock_id, side, quantity, price, fee, tax)
+  values (v_user_id, v_stock_id, p_side, p_quantity, v_price, v_fee, v_tax)
+  returning id into v_order_id;
+
+  if v_loan > 0 then
+    insert into public.margin_loans (
+      margin_account_id, order_id, principal, outstanding,
+      package_code, interest_rate, loan_date, interest_from, due_date
+    )
+    values (
+      v_account.id, v_order_id, v_loan, v_loan,
+      v_package, v_rate, v_today, v_today, v_today + v_term
+    )
+    returning id into v_loan_id;
+
+    update public.profiles
+    set cash_balance = cash_balance + v_loan
+    where id = v_user_id
+    returning cash_balance into v_cash;
+
+    insert into public.cash_transactions (user_id, type, amount, balance_after, order_id, margin_loan_id)
+    values (v_user_id, 'LOAN', v_loan, v_cash, v_order_id, v_loan_id);
+  end if;
+
+  update public.profiles
+  set cash_balance = cash_balance + v_amount
+  where id = v_user_id
+  returning cash_balance into v_cash;
+
+  insert into public.cash_transactions (user_id, type, amount, balance_after, order_id)
+  values (v_user_id, p_side::text::public.cash_tx_type, v_amount, v_cash, v_order_id);
+
+  if p_side = 'BUY' then
+    -- Giá vốn bình quân có tính phí mua
+    insert into public.holdings as h (user_id, stock_id, quantity, avg_cost)
+    values (v_user_id, v_stock_id, p_quantity, round((v_value + v_fee) / p_quantity, 2))
+    on conflict (user_id, stock_id) do update
+    set quantity = h.quantity + excluded.quantity,
+        avg_cost = round(
+          (h.quantity * h.avg_cost + v_value + v_fee) / (h.quantity + excluded.quantity),
+          2
+        );
+  elsif v_held = p_quantity then
+    -- Bán hết thì xóa dòng (holdings.quantity luôn > 0)
+    delete from public.holdings
+    where user_id = v_user_id and stock_id = v_stock_id;
+  else
+    update public.holdings
+    set quantity = quantity - p_quantity
+    where user_id = v_user_id and stock_id = v_stock_id;
+  end if;
+
+  return v_order_id;
+end;
+$$;
+
+-- ============================================================
+-- Cuối phiên (simulator gọi bằng secret key mỗi khi sang phiên mới)
+--   1. Tự trả nợ: tài khoản bật auto_repay và có tiền mặt thì thu nợ,
+--      khoản vay cũ nhất trước, mỗi khoản trừ lãi trước rồi tới gốc.
+--   2. Tự gia hạn: tài khoản bật auto_renew, khoản vay tới hạn hoặc quá hạn thì gia hạn
+--      nếu đủ điều kiện; không đủ thì để nguyên (giao diện báo Quá hạn).
+-- ============================================================
+create function public.end_session_margin(out repaid_loans integer, out renewed_loans integer)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_account public.margin_accounts;
+  v_loan record;
+  v_cash numeric(18, 2);
+  v_pay numeric(18, 2);
+begin
+  repaid_loans := 0;
+  renewed_loans := 0;
+
+  for v_account in select a.* from public.margin_accounts a order by a.id loop
+    select cash_balance into v_cash from public.profiles where id = v_account.user_id for update;
+
+    if v_account.auto_repay and v_cash > 0 then
+      for v_loan in
+        select b.id, b.debt from public.margin_loan_balances b
+        where b.margin_account_id = v_account.id and b.debt > 0
+        order by b.created_at, b.id
+      loop
+        exit when v_cash <= 0;
+        v_pay := least(v_cash, v_loan.debt);
+        perform public.apply_repayment(v_loan.id, v_pay);
+        v_cash := v_cash - v_pay;
+        repaid_loans := repaid_loans + 1;
+      end loop;
+    end if;
+
+    if v_account.auto_renew then
+      for v_loan in
+        select b.id from public.margin_loan_balances b
+        where b.margin_account_id = v_account.id
+          and b.outstanding > 0
+          and b.due_date <= public.vn_today()
+        order by b.created_at, b.id
+      loop
+        begin
+          perform public.renew_loan_internal(v_loan.id, 'AUTO_RENEW');
+          renewed_loans := renewed_loans + 1;
+        exception when others then
+          null; -- không đủ điều kiện gia hạn: để quá hạn
+        end;
+      end loop;
+    end if;
+  end loop;
+end;
+$$;
+
+-- ============================================================
+-- Quyền và RLS
+-- ============================================================
+revoke all on public.margin_packages, public.margin_package_tiers,
+  public.margin_package_stocks, public.margin_service_events
+  from anon, authenticated;
+
+-- Gói vay, bậc lãi, rổ mã: ai cũng xem được (khách xem gói và minh họa khoản vay)
+grant select on public.margin_packages, public.margin_package_tiers,
+  public.margin_package_stocks to anon, authenticated;
+grant select on public.margin_service_events, public.margin_loan_balances to authenticated;
+
+alter table public.margin_packages enable row level security;
+alter table public.margin_package_tiers enable row level security;
+alter table public.margin_package_stocks enable row level security;
+alter table public.margin_service_events enable row level security;
+
+create policy "Ai cũng xem được gói vay" on public.margin_packages
+  for select to anon, authenticated using (true);
+create policy "Ai cũng xem được bậc lãi" on public.margin_package_tiers
+  for select to anon, authenticated using (true);
+create policy "Ai cũng xem được rổ mã gói vay" on public.margin_package_stocks
+  for select to anon, authenticated using (true);
+create policy "Xem lịch sử dịch vụ ký quỹ của mình" on public.margin_service_events
+  for select to authenticated using (user_id = (select auth.uid()));
+
+-- Hàm nội bộ: client không gọi được
+revoke execute on function public.margin_position(uuid) from public, anon, authenticated;
+revoke execute on function public.apply_repayment(bigint, numeric) from public, anon, authenticated;
+revoke execute on function public.renew_loan_internal(bigint, text) from public, anon, authenticated;
+revoke execute on function public.end_session_margin() from public, anon, authenticated;
+grant execute on function public.end_session_margin() to service_role;
+
+-- RPC cho người đã đăng nhập
+revoke execute on function public.open_margin_account(boolean, boolean) from public, anon;
+revoke execute on function public.update_margin_settings(boolean, boolean) from public, anon;
+revoke execute on function public.register_margin_package(text) from public, anon;
+revoke execute on function public.cancel_margin_package() from public, anon;
+revoke execute on function public.repay_margin_loan(bigint, numeric) from public, anon;
+revoke execute on function public.renew_margin_loan(bigint) from public, anon;
+revoke execute on function public.place_order(text, public.order_side, integer, boolean) from public, anon;
+grant execute on function public.open_margin_account(boolean, boolean) to authenticated;
+grant execute on function public.update_margin_settings(boolean, boolean) to authenticated;
+grant execute on function public.register_margin_package(text) to authenticated;
+grant execute on function public.cancel_margin_package() to authenticated;
+grant execute on function public.repay_margin_loan(bigint, numeric) to authenticated;
+grant execute on function public.renew_margin_loan(bigint) to authenticated;
+grant execute on function public.place_order(text, public.order_side, integer, boolean) to authenticated;

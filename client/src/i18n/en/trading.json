@@ -58,7 +58,7 @@
     "noStock": "No symbol found",
     "detail": "Symbol details",
     "loginTitle": "Sign in to trade",
-    "loginDescription": "Guests can view the price board. Sign in to trade with 100 million VND of virtual money.",
+    "loginDescription": "Guests can view the price board. Sign in to trade with virtual money.",
     "login": "Sign in"
   },
   "errors": {
@@ -70,6 +70,11 @@
     "STOCK_NOT_FOUND": "Symbol not found",
     "INSUFFICIENT_CASH": "Not enough cash. The price may have just risen, try a smaller quantity.",
     "INSUFFICIENT_SHARES": "Not enough shares to sell",
+    "MARGIN_ACCOUNT_REQUIRED": "Open a margin account to borrow",
+    "LOAN_OVERDUE": "You have an overdue loan, repay or renew it before borrowing more",
+    "STOCK_NOT_MARGINABLE": "This stock is not marginable",
+    "LOAN_LIMIT_EXCEEDED": "The loan exceeds the loan ratio of this stock. The price may have moved, reduce the quantity.",
+    "MARGIN_RATIO_TOO_LOW": "Margin ratio after the order is below the initial level. The price may have moved, reduce the quantity.",
     "UNKNOWN": "Could not send the order, please try again"
   },
   "orders": {
@@ -93,5 +98,23 @@
     "empty": "No orders yet. Open the price board and pick a symbol to place your first order.",
     "emptyFiltered": "No orders match the filters",
     "toMarket": "Open price board"
+  },
+  "margin": {
+    "toggle": "Use margin loan",
+    "toggleHint": "Borrows the shortfall when cash is not enough. This stock can be financed up to {{rate}} of the order value.",
+    "noAccount": "No margin account yet.",
+    "openLink": "Open one",
+    "notMarginable": "This stock is not marginable.",
+    "buyingPower": "Margin buying power",
+    "cashUsed": "Cash used",
+    "loan": "Margin loan",
+    "package": "Package applied",
+    "ratioAfter": "Margin ratio after order",
+    "valid": "Meets the initial margin ratio of {{rate}}. Order is valid.",
+    "errors": {
+      "STOCK_NOT_MARGINABLE": "This stock is not marginable.",
+      "LOAN_LIMIT_EXCEEDED": "The loan exceeds the loan ratio of this stock, reduce the quantity.",
+      "MARGIN_RATIO_TOO_LOW": "Margin ratio after the order is below {{rate}}, reduce the quantity."
+    }
   }
 }

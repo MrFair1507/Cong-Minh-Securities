@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as AppAuthedRouteImport } from './routes/_app/_authed'
 import { Route as AppMarketRouteImport } from './routes/_app/market'
+import { Route as GuestForgotPasswordRouteImport } from './routes/_guest/forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest/login'
 import { Route as GuestRegisterRouteImport } from './routes/_guest/register'
 import { Route as AppAuthedCashRouteImport } from './routes/_app/_authed/cash'
@@ -44,6 +45,11 @@ const AppMarketRoute = AppMarketRouteImport.update({
   id: '/market',
   path: '/market',
   getParentRoute: () => AppRoute,
+} as any)
+const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => GuestRoute,
 } as any)
 const GuestLoginRoute = GuestLoginRouteImport.update({
   id: '/login',
@@ -89,6 +95,7 @@ const AppAuthedStocksSymbolRoute = AppAuthedStocksSymbolRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/market': typeof AppMarketRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/register': typeof GuestRegisterRoute
   '/cash': typeof AppAuthedCashRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/market': typeof AppMarketRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/register': typeof GuestRegisterRoute
   '/cash': typeof AppAuthedCashRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_guest': typeof GuestRouteWithChildren
   '/_app/_authed': typeof AppAuthedRouteWithChildren
   '/_app/market': typeof AppMarketRoute
+  '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/register': typeof GuestRegisterRoute
   '/_app/_authed/cash': typeof AppAuthedCashRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/market'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/cash'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/market'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/cash'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/_guest'
     | '/_app/_authed'
     | '/_app/market'
+    | '/_guest/forgot-password'
     | '/_guest/login'
     | '/_guest/register'
     | '/_app/_authed/cash'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/market'
       preLoaderRoute: typeof AppMarketRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_guest/forgot-password': {
+      id: '/_guest/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof GuestForgotPasswordRouteImport
+      parentRoute: typeof GuestRoute
     }
     '/_guest/login': {
       id: '/_guest/login'
@@ -305,11 +324,13 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface GuestRouteChildren {
+  GuestForgotPasswordRoute: typeof GuestForgotPasswordRoute
   GuestLoginRoute: typeof GuestLoginRoute
   GuestRegisterRoute: typeof GuestRegisterRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
+  GuestForgotPasswordRoute: GuestForgotPasswordRoute,
   GuestLoginRoute: GuestLoginRoute,
   GuestRegisterRoute: GuestRegisterRoute,
 }

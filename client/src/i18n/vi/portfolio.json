@@ -1,0 +1,32 @@
+{
+  "stats": {
+    "total": "Tổng tài sản",
+    "totalHint": "Cổ phiếu + tiền mặt",
+    "marketValue": "Giá trị cổ phiếu",
+    "marketValueHint": "{{n}} mã đang nắm giữ",
+    "profit": "Lãi/lỗ chưa thực hiện",
+    "profitHint": "{{percent}} so với giá vốn",
+    "cash": "Tiền mặt",
+    "cashHint": "Nạp thêm tiền",
+    "debtHint": "Dư nợ ký quỹ {{debt}}",
+    "netHint": "Tài sản ròng {{value}}"
+  },
+  "columns": {
+    "symbol": "Mã",
+    "quantity": "KL",
+    "avgCost": "Giá vốn",
+    "price": "Giá hiện tại",
+    "value": "Giá trị",
+    "profit": "Lãi/lỗ",
+    "weight": "Tỷ trọng"
+  },
+  "sell": "Bán",
+  "sellLabel": "Bán {{symbol}}",
+  "empty": "Bạn chưa nắm giữ cổ phiếu nào",
+  "toMarket": "Xem bảng giá",
+  "allocation": {
+    "title": "Tỷ trọng danh mục",
+    "count": "{{n}} mã",
+    "others": "Khác ({{n}} mã)"
+  }
+}

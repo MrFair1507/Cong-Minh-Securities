@@ -45,7 +45,7 @@
     },
     "portfolio": {
       "title": "Portfolio",
-      "description": "Holdings and unrealized profit/loss"
+      "description": "Profit/loss updates with real-time prices"
     },
     "cash": {
       "title": "Cash flow",
@@ -53,19 +53,19 @@
     },
     "margin": {
       "title": "Margin account",
-      "description": "Margin ratio, debt and loans"
+      "description": "Borrow to buy more stock, track your margin ratio and loans"
     },
     "profile": {
       "title": "Profile",
-      "description": "Your account information"
+      "description": "Account details, identity document and security"
     },
     "login": {
       "title": "Log in",
-      "description": "Log in to trade with 100 million in virtual capital"
+      "description": "Log in to trade with virtual money"
     },
     "register": {
       "title": "Sign up",
-      "description": "Create an account and get 100 million in virtual capital"
+      "description": "Create an account and deposit virtual money from a simulated bank"
     }
   },
   "table": {
@@ -73,5 +73,6 @@
     "previous": "Previous",
     "next": "Next"
   },
-  "placeholder": "This page is under construction."
+  "placeholder": "This page is under construction.",
+  "amountPlaceholder": "Enter amount"
 }

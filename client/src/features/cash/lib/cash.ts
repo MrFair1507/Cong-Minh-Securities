@@ -44,17 +44,8 @@ export function maskAccount(accountNo: string): string {
   return `••••${accountNo.slice(-4)}`
 }
 
-// Ô số tiền cho gõ "5.000.000": bỏ mọi ký tự không phải số
-export function parseMoney(text: string): number {
-  const digits = text.replace(/\D/g, '')
-  return digits ? Number(digits) : 0
-}
-
-// Hiện lại số tiền đang gõ với dấu chấm ngăn nghìn: "5000000" -> "5.000.000"
-export function formatMoneyInput(text: string): string {
-  const value = parseMoney(text)
-  return value > 0 ? value.toLocaleString('vi-VN') : ''
-}
+// Dời sang shared/lib/money.ts để /margin dùng chung, giữ export cho các file cũ
+export { formatMoneyInput, parseMoney } from '@/shared/lib/money'
 
 // Tài khoản nhận tiền của CMS tại mỗi ngân hàng mô phỏng (số tự đặt)
 const COLLECTION_ACCOUNTS: Record<string, string> = {

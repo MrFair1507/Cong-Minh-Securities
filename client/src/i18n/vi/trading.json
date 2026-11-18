@@ -58,7 +58,7 @@
     "noStock": "Không tìm thấy mã",
     "detail": "Chi tiết mã",
     "loginTitle": "Đăng nhập để đặt lệnh",
-    "loginDescription": "Khách xem được bảng giá. Đăng nhập để mua bán với 100 triệu đồng tiền ảo.",
+    "loginDescription": "Khách xem được bảng giá. Đăng nhập để mua bán bằng tiền ảo.",
     "login": "Đăng nhập"
   },
   "errors": {
@@ -70,6 +70,11 @@
     "STOCK_NOT_FOUND": "Không tìm thấy mã chứng khoán",
     "INSUFFICIENT_CASH": "Không đủ tiền mặt. Giá có thể vừa tăng, hãy giảm khối lượng.",
     "INSUFFICIENT_SHARES": "Không đủ cổ phiếu để bán",
+    "MARGIN_ACCOUNT_REQUIRED": "Cần mở tài khoản ký quỹ để vay",
+    "LOAN_OVERDUE": "Có khoản vay quá hạn, hãy trả nợ hoặc gia hạn trước khi vay thêm",
+    "STOCK_NOT_MARGINABLE": "Mã này không cho vay ký quỹ",
+    "LOAN_LIMIT_EXCEEDED": "Tiền vay vượt tỷ lệ cho vay của mã. Giá có thể vừa đổi, hãy giảm khối lượng.",
+    "MARGIN_RATIO_TOO_LOW": "Tỷ lệ ký quỹ sau lệnh dưới mức ban đầu. Giá có thể vừa đổi, hãy giảm khối lượng.",
     "UNKNOWN": "Không gửi được lệnh, hãy thử lại"
   },
   "orders": {
@@ -93,5 +98,23 @@
     "empty": "Chưa có lệnh nào. Vào Bảng giá, chọn một mã để đặt lệnh đầu tiên.",
     "emptyFiltered": "Không có lệnh nào khớp bộ lọc",
     "toMarket": "Mở bảng giá"
+  },
+  "margin": {
+    "toggle": "Dùng vay ký quỹ",
+    "toggleHint": "Tự vay phần còn thiếu khi tiền mặt không đủ. Mã này cho vay tối đa {{rate}} giá trị lệnh.",
+    "noAccount": "Chưa có tài khoản ký quỹ.",
+    "openLink": "Mở tài khoản",
+    "notMarginable": "Mã này không cho vay ký quỹ.",
+    "buyingPower": "Sức mua có vay",
+    "cashUsed": "Tiền mặt sử dụng",
+    "loan": "Vay ký quỹ",
+    "package": "Gói áp dụng",
+    "ratioAfter": "Tỷ lệ ký quỹ sau lệnh",
+    "valid": "Đạt tỷ lệ ký quỹ ban đầu {{rate}}. Lệnh hợp lệ.",
+    "errors": {
+      "STOCK_NOT_MARGINABLE": "Mã này không cho vay ký quỹ.",
+      "LOAN_LIMIT_EXCEEDED": "Tiền vay vượt tỷ lệ cho vay của mã, hãy giảm khối lượng.",
+      "MARGIN_RATIO_TOO_LOW": "Tỷ lệ ký quỹ sau lệnh dưới {{rate}}, hãy giảm khối lượng."
+    }
   }
 }

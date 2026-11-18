@@ -37,7 +37,12 @@ export function OrdersPage() {
 
   // Bộ lọc nằm trên URL: /orders?side=BUY&symbol=FPT
   function updateSearch(patch: Partial<OrdersSearch>) {
-    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true })
+    // resetScroll: false - chỉ đổi bộ lọc, giữ vị trí cuộn (mặc định router cuộn về đầu trang)
+    navigate({
+      search: (prev) => ({ ...prev, ...patch }),
+      replace: true,
+      resetScroll: false,
+    })
   }
 
   return (

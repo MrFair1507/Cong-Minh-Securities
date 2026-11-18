@@ -7,8 +7,6 @@ import { Button } from '@/shared/ui/button'
 import { profileQueryOptions } from '../../api/profile'
 import { StepHeading } from './RegisterStepper'
 
-// userId lấy từ session trong router context. Ngay sau signUp có thể còn undefined
-// trong tích tắc (chờ router.invalidate), nên query chỉ chạy khi đã có id.
 export function CompleteStep({ userId }: { userId?: string }) {
   const { t } = useTranslation('auth')
   const { data: profile } = useQuery({
@@ -47,9 +45,14 @@ export function CompleteStep({ userId }: { userId?: string }) {
         </div>
       </dl>
 
-      <Button asChild size="lg" className="w-full">
-        <Link to="/market">{t('kyc.complete.goToMarket')}</Link>
-      </Button>
+      <div className="grid w-full grid-cols-2 gap-3">
+        <Button asChild size="lg" variant="outline">
+          <Link to="/market">{t('kyc.complete.goToMarket')}</Link>
+        </Button>
+        <Button asChild size="lg">
+          <Link to="/cash">{t('kyc.complete.deposit')}</Link>
+        </Button>
+      </div>
     </div>
   )
 }

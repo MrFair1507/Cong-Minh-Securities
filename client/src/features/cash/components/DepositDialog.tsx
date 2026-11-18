@@ -41,7 +41,6 @@ type DepositDialogProps = {
   onLink: () => void // chưa có tài khoản liên kết: mở hộp thoại liên kết
 }
 
-// Nộp tiền từ ngân hàng mô phỏng: nộp nhanh, hoặc chuyển khoản theo mã QR rồi bấm "đã chuyển"
 export function DepositDialog({
   userId,
   open,

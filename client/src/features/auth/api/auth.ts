@@ -34,6 +34,7 @@ const ERROR_KEYS = {
   email_exists: 'errors.emailTaken',
   email_not_confirmed: 'errors.emailNotConfirmed',
   weak_password: 'errors.weakPassword',
+  same_password: 'errors.samePassword',
   over_request_rate_limit: 'errors.rateLimit',
   // Trigger lỗi (vd. constraint chặn số giấy tờ) → Supabase trả "Database error saving new user"
   unexpected_failure: 'errors.signupRejected',

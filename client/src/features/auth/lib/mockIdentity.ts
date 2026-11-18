@@ -1,6 +1,3 @@
-// Sinh thông tin giấy tờ hư cấu cho bước eKYC mô phỏng. Không có OCR: ảnh tải lên
-// không được đọc, mọi giá trị đều ngẫu nhiên. Ngày dạng 'YYYY-MM-DD' (kiểu date của Postgres).
-
 export const GENDERS = ['MALE', 'FEMALE'] as const
 export type Gender = (typeof GENDERS)[number]
 
@@ -12,8 +9,6 @@ export type MockIdentity = {
   issuedOn: string
 }
 
-// CCCD thật bắt đầu bằng mã tỉnh 001–096, nên tiền tố 999 không bao giờ trùng giấy tờ thật.
-// DB chặn thêm bằng check (id_number ~ '^999\d{9}$').
 export const MOCK_ID_PREFIX = '999'
 
 function randomInt(min: number, max: number) {

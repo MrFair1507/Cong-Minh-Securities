@@ -3,12 +3,16 @@ import { initReactI18next } from 'react-i18next'
 import enAuth from './en/auth.json'
 import enCash from './en/cash.json'
 import enCommon from './en/common.json'
+import enMargin from './en/margin.json'
 import enMarket from './en/market.json'
+import enPortfolio from './en/portfolio.json'
 import enTrading from './en/trading.json'
 import viAuth from './vi/auth.json'
 import viCash from './vi/cash.json'
 import viCommon from './vi/common.json'
+import viMargin from './vi/margin.json'
 import viMarket from './vi/market.json'
+import viPortfolio from './vi/portfolio.json'
 import viTrading from './vi/trading.json'
 
 export const defaultNS = 'common'
@@ -21,6 +25,8 @@ const vi = {
   market: viMarket,
   trading: viTrading,
   cash: viCash,
+  portfolio: viPortfolio,
+  margin: viMargin,
 }
 // satisfies: file tiếng Anh thiếu key nào so với tiếng Việt thì TypeScript báo lỗi
 const en = {
@@ -29,6 +35,8 @@ const en = {
   market: enMarket,
   trading: enTrading,
   cash: enCash,
+  portfolio: enPortfolio,
+  margin: enMargin,
 } satisfies typeof vi
 
 export const resources = { vi, en } as const

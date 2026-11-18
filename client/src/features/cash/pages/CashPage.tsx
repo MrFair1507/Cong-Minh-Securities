@@ -23,7 +23,6 @@ import { CASH_TYPES, type CashTxType, flowTotals } from '../lib/cash'
 const ROUTE_ID = '/_app/_authed/cash'
 const ALL = 'ALL'
 
-// Lịch sử dòng tiền (frame 07) + ngân hàng liên kết mô phỏng, nộp/rút tiền
 export function CashPage() {
   const { t } = useTranslation('cash')
   const { t: tc } = useTranslation()
@@ -119,6 +118,7 @@ export function CashPage() {
           navigate({
             search: { type: value === ALL ? undefined : (value as CashTxType) },
             replace: true,
+            resetScroll: false, // chỉ đổi bộ lọc: giữ vị trí cuộn, không nhảy lên đầu trang
           })
         }
       >

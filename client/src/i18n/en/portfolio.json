@@ -1,0 +1,32 @@
+{
+  "stats": {
+    "total": "Total assets",
+    "totalHint": "Stocks + cash",
+    "marketValue": "Stock value",
+    "marketValueHint": "Stocks held: {{n}}",
+    "profit": "Unrealized P/L",
+    "profitHint": "{{percent}} vs. cost",
+    "cash": "Cash",
+    "cashHint": "Deposit more",
+    "debtHint": "Margin debt {{debt}}",
+    "netHint": "Net assets {{value}}"
+  },
+  "columns": {
+    "symbol": "Symbol",
+    "quantity": "Qty",
+    "avgCost": "Avg cost",
+    "price": "Current price",
+    "value": "Value",
+    "profit": "P/L",
+    "weight": "Weight"
+  },
+  "sell": "Sell",
+  "sellLabel": "Sell {{symbol}}",
+  "empty": "You don't hold any stocks yet",
+  "toMarket": "View market",
+  "allocation": {
+    "title": "Portfolio allocation",
+    "count": "Stocks: {{n}}",
+    "others": "Others ({{n}})"
+  }
+}

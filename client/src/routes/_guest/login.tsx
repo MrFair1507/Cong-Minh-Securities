@@ -10,6 +10,8 @@ const loginSearchSchema = z.object({
     .regex(/^\/(?!\/)/)
     .optional()
     .catch(undefined),
+  // email: điền sẵn sau khi đặt lại mật khẩu ở /forgot-password
+  email: z.string().optional().catch(undefined),
 })
 
 export const Route = createFileRoute('/_guest/login')({

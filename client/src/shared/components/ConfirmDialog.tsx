@@ -20,7 +20,7 @@ type ConfirmDialogProps = {
   destructive?: boolean // nút xác nhận màu đỏ cho thao tác khó hoàn tác
 }
 
-// Hộp thoại hỏi lại trước thao tác quan trọng (hủy liên kết, đặt lại tài khoản)
+// Hộp thoại hỏi lại trước thao tác quan trọng (vd. hủy liên kết ngân hàng)
 export function ConfirmDialog({
   open,
   onOpenChange,
