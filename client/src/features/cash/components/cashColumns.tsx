@@ -13,7 +13,6 @@ import { type CashTxType, cashReference, maskAccount } from '../lib/cash'
 
 const column = createDataColumnHelper<CashRow>()
 
-// Màu nhãn theo loại giao dịch (viết đủ tên class để Tailwind quét được)
 const TYPE_CLASS: Record<CashTxType, string> = {
   BUY: 'bg-price-up/10 text-price-up',
   SELL: 'bg-price-down/10 text-price-down',

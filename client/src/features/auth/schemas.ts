@@ -5,7 +5,12 @@ import { ageOn, GENDERS } from './lib/mockIdentity'
 // Nhận t để thông báo lỗi đi qua i18n (đổi ngôn ngữ thì lỗi đổi theo)
 export const loginSchema = (t: TFunction<'auth'>) =>
   z.object({
-    email: z.email(t('errors.emailInvalid')),
+    // Ô trống báo "Vui lòng nhập email", có chữ mà sai dạng mới báo "không hợp lệ"
+    email: z
+      .string()
+      .trim()
+      .min(1, t('errors.emailRequired'))
+      .pipe(z.email(t('errors.emailInvalid'))),
     password: z.string().min(1, t('errors.passwordRequired')),
   })
 

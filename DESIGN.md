@@ -23,7 +23,7 @@ Quyết định thiết kế đã chốt cho giao diện CMS. Màn mới làm th
 - Header bảng giá: chữ `text-foreground/70`; nền tối dùng `bg-card` vì `--muted` trùng `--border`.
 - Trạng thái ký quỹ: `--safe`, `--warning`, `--danger` (kèm `-bg`).
 - Phong cách: flat. Có 2 theme sáng/tối, mặc định theo hệ thống (`next-themes`, class `dark` trên `<html>`, lưu `cms.theme`). Theme tối dùng zinc đảo ngược (nền #09090b), màu giá sáng hơn một bậc: tăng #22c55e, giảm #ef4444, TC #eab308, trần #e879f9, sàn #22d3ee.
-- Cột thương hiệu ở trang đăng nhập/đăng ký luôn nền tối (zinc-900) ở cả 2 theme.
+- Cột thương hiệu ở trang đăng nhập/đăng ký (23/11): rộng 520px, lệch nền một bậc so với cột form + viền phải (sáng `bg-muted`, tối `bg-card`), logo nền primary như header. Đã thử đảo màu (tối → nền trắng) nhưng mảng trắng chói hơn form nên bỏ. Không có dòng chân trang. 520px để màn 1024 không cuộn ngang.
 
 ## Bảng giá `/market`
 

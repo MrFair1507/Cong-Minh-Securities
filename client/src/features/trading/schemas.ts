@@ -6,7 +6,6 @@ import { isLotQuantity, parseQuantity } from './lib/order'
 
 export const ORDER_SIDES = ['BUY', 'SELL'] as const satisfies OrderSide[]
 
-// Chỉ kiểm định dạng. Giới hạn tối đa phụ thuộc giá đang chạy nên tính trực tiếp trong hộp thoại.
 export const orderFormSchema = (t: TFunction<'trading'>) =>
   z.object({
     quantity: z

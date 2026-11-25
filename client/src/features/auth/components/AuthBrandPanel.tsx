@@ -8,11 +8,12 @@ export function AuthBrandPanel() {
   const { t } = useTranslation('auth')
   const { t: tc } = useTranslation()
 
-  // Cột thương hiệu luôn nền tối ở cả 2 theme, nên dùng màu zinc cố định thay vì token
+  // Cột thương hiệu lệch nền một bậc so với cột form + viền phải (sáng: muted, tối: card).
+  // Rộng 520px để màn 1024px vẫn đủ chỗ cho form 380px.
   return (
-    <aside className="flex w-[640px] shrink-0 flex-col justify-between bg-zinc-900 p-12 text-zinc-50 dark:border-r dark:border-border">
+    <aside className="flex w-130 shrink-0 flex-col gap-12 border-r bg-muted p-12 dark:bg-card">
       <Link to="/market" className="flex items-center gap-2.5">
-        <span className="grid size-7 place-items-center rounded-md bg-zinc-50 text-zinc-900">
+        <span className="grid size-7 place-items-center rounded-md bg-primary text-primary-foreground">
           <TrendingUp className="size-4" aria-hidden />
         </span>
         <span className="text-base leading-6 font-semibold">
@@ -20,7 +21,7 @@ export function AuthBrandPanel() {
         </span>
       </Link>
 
-      <div className="flex flex-col gap-5">
+      <div className="my-auto flex flex-col gap-5">
         <p className="text-[32px] leading-10 font-semibold">
           {t('brand.headline')}
         </p>
@@ -28,7 +29,7 @@ export function AuthBrandPanel() {
           {FEATURES.map((key) => (
             <li
               key={key}
-              className="flex items-center gap-2.5 text-sm text-zinc-200"
+              className="flex items-center gap-2.5 text-sm text-foreground/80"
             >
               <Check className="size-4 text-safe" aria-hidden />
               {t(`brand.${key}`)}
@@ -36,8 +37,6 @@ export function AuthBrandPanel() {
           ))}
         </ul>
       </div>
-
-      <p className="text-xs text-zinc-400">{t('brand.footer')}</p>
     </aside>
   )
 }

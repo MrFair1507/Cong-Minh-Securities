@@ -1,4 +1,4 @@
-import { useForm } from '@tanstack/react-form'
+import { revalidateLogic, useForm } from '@tanstack/react-form'
 import { Link, useSearch } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -14,7 +14,10 @@ export function LoginPage() {
 
   const form = useForm({
     defaultValues: { email: search.email ?? '', password: '' },
-    validators: { onBlur: schema, onSubmit: schema },
+    // Chưa bấm Đăng nhập thì không báo lỗi; bấm rồi thì kiểm lại mỗi lần gõ.
+    // Không dùng onBlur: rời ô làm hiện lỗi, nút bị đẩy xuống, cú bấm trượt.
+    validationLogic: revalidateLogic(),
+    validators: { onDynamic: schema },
     onSubmit: async ({ value }) => {
       const error = await signIn(value)
       if (error) toast.error(t(authErrorKey(error)))
@@ -44,6 +47,7 @@ export function LoginPage() {
             label={t('fields.email')}
             type="email"
             autoComplete="email"
+            autoFocus
             placeholder={t('fields.emailPlaceholder')}
           />
         )}

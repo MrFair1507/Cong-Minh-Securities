@@ -1,5 +1,7 @@
+import { cn } from 'cn'
 import { createContext, type ReactNode, useContext } from 'react'
 import {
+  DialogBody,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -45,6 +47,21 @@ export function StepHeader({
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   )
+}
+
+// Khung ngoài mỗi bước. Trong hộp thoại phải co được (min-h-0) thì StepBody mới cuộn.
+// Panel tự cuộn cả khối, thêm min-h-0 thì form bị ép đè lên sổ lệnh bên dưới.
+export function stepClass(surface: OrderSurface) {
+  return cn('flex flex-col gap-4', surface === 'dialog' && 'min-h-0')
+}
+
+// Phần giữa header và footer: hộp thoại chỉ cuộn phần này, panel để nguyên
+export function StepBody({ children }: { children: ReactNode }) {
+  const surface = useOrderSurface()
+  if (surface === 'dialog') {
+    return <DialogBody className="flex flex-col gap-4">{children}</DialogBody>
+  }
+  return <>{children}</>
 }
 
 export function StepFooter({ children }: { children: ReactNode }) {

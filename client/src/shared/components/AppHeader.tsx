@@ -62,7 +62,6 @@ export function AppHeader({ session }: { session: Session | null }) {
     <header className="sticky top-0 z-40 h-16 border-b bg-background">
       <div className="mx-auto flex h-full max-w-[1200px] items-center gap-6 px-6">
         <Logo />
-
         <nav aria-label={t('nav.label')} className="flex items-center gap-1">
           {items.map(({ to, key, icon: Icon }) => (
             <Link

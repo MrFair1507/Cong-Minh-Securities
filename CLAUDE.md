@@ -153,6 +153,13 @@
   - `/portfolio`: khi có nợ thì Tổng tài sản ghi tài sản ròng, Tiền mặt ghi dư nợ (link `/margin`).
   - Simulator: `margin-watch.ts` đọc nợ từ view, `startSession` gọi `end_session_margin`.
   - Migration `margin` đã push.
+- Sửa hộp thoại tràn màn hình (19/11, chưa commit). Laptop 768px chỉ còn khoảng 650px chiều cao trình duyệt; hộp thoại mua có vay cao 977px, bị cắt và không cuộn được.
+  - `shared/ui/dialog.tsx`: `DialogContent` có `max-h-[calc(100dvh-2rem)] overflow-y-auto` (chặn tràn cho mọi hộp thoại); thêm `DialogBody` (chỉ phần giữa cuộn, header/footer đứng yên). Cách dùng: `DialogContent` thêm `flex flex-col`, khối bọc ngoài có `min-h-0`, phần giữa bọc `DialogBody`.
+  - Đã áp dụng: `OrderDialog` (`OrderSurface` thêm `StepBody`, `stepClass`; chỉ co ở hộp thoại, panel giữ nguyên), `DepositDialog`. `PackageDialog` đã làm kiểu này từ trước.
+  - Đã đo bằng Playwright ở 1366×650: mua có vay, xác nhận, bán, nộp QR đều vừa màn; panel cạnh bảng giá không bị ảnh hưởng.
+  - Còn: `/market` tràn ngang ở 1280 (bảng giá 1351px trong khung 1248px). Màn đăng nhập/đăng ký tràn ở 1024 (dưới mức desktop, bỏ qua).
+  - `yarn check` báo lỗi format ở `marginActions.ts`, `MarginCallWatcher.tsx`, `useMarginSummary.ts` (có từ trước, chưa sửa).
+- Sửa màn đăng nhập (23/11, chưa commit): cột thương hiệu 520px lệch nền một bậc (DESIGN.md); form đăng nhập dùng `validationLogic: revalidateLogic()` + `validators: { onDynamic }` (chưa bấm thì không báo lỗi, bấm rồi kiểm lại mỗi lần gõ; mẫu nên dùng cho form khác thay `onBlur`), email trống báo `errors.emailRequired`, ô email `autoFocus`. Đã kiểm bằng Playwright: 1024 hết cuộn ngang, sáng/tối.
 - Tiếp theo: `db:types` (Minh) → chạy Playwright luồng demo (nạp tiền → mở TK ký quỹ → mua có vay → `--trend=down --session=60` → cảnh báo → trả nợ → thu nợ cuối phiên) → tuần 3 (Vitest, báo cáo).
 - Yarn 1 global đã gỡ; corepack đã bật không cần admin bằng `corepack enable --install-directory "%APPDATA%\npm" yarn`. Gõ `yarn` trực tiếp là ra 4.18.1 (terminal mở trước khi sửa thì mở lại).
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.

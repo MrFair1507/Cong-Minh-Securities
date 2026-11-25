@@ -20,7 +20,6 @@ const SIDE_BADGE = {
   SELL: 'bg-price-down/10 text-price-down',
 } as const
 
-// Cột bảng Lịch sử lệnh (frame 05). Giá theo nghìn đồng như bảng giá, tiền ghi đủ đồng.
 export function ordersColumns(t: TFunction<'trading'>) {
   return column.columns([
     column.accessor('created_at', {

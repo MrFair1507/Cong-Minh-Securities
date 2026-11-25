@@ -9,6 +9,7 @@ import { formatMoney } from '@/shared/lib/format'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -38,7 +39,7 @@ type DepositDialogProps = {
   userId: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onLink: () => void // chưa có tài khoản liên kết: mở hộp thoại liên kết
+  onLink: () => void 
 }
 
 export function DepositDialog({
@@ -49,7 +50,7 @@ export function DepositDialog({
 }: DepositDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 sm:max-w-[600px]">
+      <DialogContent className="flex flex-col gap-0 sm:max-w-[600px]">
         <DepositForm
           userId={userId}
           onDone={() => onOpenChange(false)}
@@ -135,101 +136,105 @@ function DepositForm({
   const bank = bankName(banks, link.bank_code)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-col gap-4">
       {header}
 
-      <ChoiceCards
-        name="deposit-source"
-        legend={t('transfer.source')}
-        value={String(link.id)}
-        onChange={(value) => setLinkId(Number(value))}
-        options={links.map((l) => ({
-          value: String(l.id),
-          title: bankName(banks, l.bank_code),
-          subtitle: `${maskAccount(l.account_no)} · ${formatMoney(l.balance)}`,
-          mark: l.bank_code,
-        }))}
-      />
+      <DialogBody className="flex flex-col gap-4">
+        <ChoiceCards
+          name="deposit-source"
+          legend={t('transfer.source')}
+          value={String(link.id)}
+          onChange={(value) => setLinkId(Number(value))}
+          options={links.map((l) => ({
+            value: String(l.id),
+            title: bankName(banks, l.bank_code),
+            subtitle: `${maskAccount(l.account_no)} · ${formatMoney(l.balance)}`,
+            mark: l.bank_code,
+          }))}
+        />
 
-      <AmountField
-        id="deposit-amount"
-        label={t('transfer.amount')}
-        value={amountText}
-        onChange={setAmountText}
-        error={amountError}
-        hint={t('transfer.min', { min: formatMoney(MIN_TRANSFER) })}
-        quick={QUICK_DEPOSITS.map((value) => ({
-          label: amountShort(value),
-          amount: value <= max ? value : 0,
-          ariaLabel: t('transfer.quickLabel', { amount: formatMoney(value) }),
-        }))}
-      />
+        <AmountField
+          id="deposit-amount"
+          label={t('transfer.amount')}
+          value={amountText}
+          onChange={setAmountText}
+          error={amountError}
+          hint={t('transfer.min', { min: formatMoney(MIN_TRANSFER) })}
+          quick={QUICK_DEPOSITS.map((value) => ({
+            label: amountShort(value),
+            amount: value <= max ? value : 0,
+            ariaLabel: t('transfer.quickLabel', { amount: formatMoney(value) }),
+          }))}
+        />
 
-      <Tabs
-        value={method}
-        onValueChange={(value) => setMethod(value as 'instant' | 'qr')}
-      >
-        <TabsList aria-label={t('deposit.methodLabel')} className="w-full">
-          <TabsTrigger value="instant">{t('deposit.instant')}</TabsTrigger>
-          <TabsTrigger value="qr">{t('deposit.qr')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent
-          value="instant"
-          className="pt-2 text-xs text-muted-foreground"
+        <Tabs
+          value={method}
+          onValueChange={(value) => setMethod(value as 'instant' | 'qr')}
         >
-          {t('deposit.instantHint')}
-        </TabsContent>
+          <TabsList aria-label={t('deposit.methodLabel')} className="w-full">
+            <TabsTrigger value="instant">{t('deposit.instant')}</TabsTrigger>
+            <TabsTrigger value="qr">{t('deposit.qr')}</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="qr" className="flex flex-col gap-3 pt-2">
-          <p className="text-xs text-muted-foreground">{t('deposit.qrHint')}</p>
-          <div className="grid grid-cols-1 items-center gap-4 rounded-lg border p-4 sm:grid-cols-[148px_1fr]">
-            <div className="flex size-[148px] items-center justify-center justify-self-center rounded-lg bg-white p-2">
-              {valid ? (
-                <QRCodeSVG
-                  value={depositQrPayload({
-                    bankCode: link.bank_code,
-                    amount,
-                    memo,
-                  })}
-                  size={132}
-                  level="M"
-                  title={t('deposit.qrAlt', { bank })}
+          <TabsContent
+            value="instant"
+            className="pt-2 text-xs text-muted-foreground"
+          >
+            {t('deposit.instantHint')}
+          </TabsContent>
+
+          <TabsContent value="qr" className="flex flex-col gap-3 pt-2">
+            <p className="text-xs text-muted-foreground">
+              {t('deposit.qrHint')}
+            </p>
+            <div className="grid grid-cols-1 items-center gap-4 rounded-lg border p-4 sm:grid-cols-[148px_1fr]">
+              <div className="flex size-[148px] items-center justify-center justify-self-center rounded-lg bg-white p-2">
+                {valid ? (
+                  <QRCodeSVG
+                    value={depositQrPayload({
+                      bankCode: link.bank_code,
+                      amount,
+                      memo,
+                    })}
+                    size={132}
+                    level="M"
+                    title={t('deposit.qrAlt', { bank })}
+                  />
+                ) : (
+                  <span className="px-2 text-center text-xs text-zinc-500">
+                    {t('deposit.qrNeedAmount')}
+                  </span>
+                )}
+              </div>
+              <div className="flex min-w-0 flex-col gap-1">
+                <CopyRow label={t('deposit.receiveBank')} value={bank} />
+                <CopyRow
+                  label={t('deposit.receiveAccount')}
+                  value={collectionAccount(link.bank_code)}
                 />
-              ) : (
-                <span className="px-2 text-center text-xs text-zinc-500">
-                  {t('deposit.qrNeedAmount')}
-                </span>
-              )}
+                <CopyRow
+                  label={t('deposit.receiveHolder')}
+                  value={t('deposit.receiveHolderValue')}
+                />
+                <CopyRow
+                  label={t('transfer.amount')}
+                  value={String(amount)}
+                  display={amount > 0 ? formatMoney(amount) : '—'}
+                />
+                <CopyRow
+                  label={t('deposit.memo')}
+                  value={memo}
+                  display={<span className="text-warning">{memo}</span>}
+                />
+              </div>
             </div>
-            <div className="flex min-w-0 flex-col gap-1">
-              <CopyRow label={t('deposit.receiveBank')} value={bank} />
-              <CopyRow
-                label={t('deposit.receiveAccount')}
-                value={collectionAccount(link.bank_code)}
-              />
-              <CopyRow
-                label={t('deposit.receiveHolder')}
-                value={t('deposit.receiveHolderValue')}
-              />
-              <CopyRow
-                label={t('transfer.amount')}
-                value={String(amount)}
-                display={amount > 0 ? formatMoney(amount) : '—'}
-              />
-              <CopyRow
-                label={t('deposit.memo')}
-                value={memo}
-                display={<span className="text-warning">{memo}</span>}
-              />
-            </div>
-          </div>
-          <p className="flex gap-2 rounded-lg bg-warning-bg p-3 text-xs leading-5 text-warning">
-            <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-            {t('deposit.qrNote')}
-          </p>
-        </TabsContent>
-      </Tabs>
+            <p className="flex gap-2 rounded-lg bg-warning-bg p-3 text-xs leading-5 text-warning">
+              <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+              {t('deposit.qrNote')}
+            </p>
+          </TabsContent>
+        </Tabs>
+      </DialogBody>
 
       <DialogFooter>
         <Button type="button" variant="outline" size="lg" onClick={onDone}>

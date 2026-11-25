@@ -27,12 +27,11 @@ const compactFormat = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 1,
 })
 
-// Số gọn cho chỗ hẹp: 143630000 -> "143,6 Tr"
+
 export function formatCompact(value: number): string {
   return compactFormat.format(value)
 }
 
-// 3215400 -> "3.215.400"
 export function formatVolume(value: number): string {
   return integerFormat.format(value)
 }

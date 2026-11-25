@@ -5,8 +5,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 
-// Ô nhập số tiền có dấu chấm ngăn nghìn, đọc số thành chữ và các nút chọn nhanh.
-// Dùng ở nộp/rút tiền (/cash), trả nợ và minh họa khoản vay (/margin).
+
 export function AmountField({
   id,
   label,
@@ -28,7 +27,6 @@ export function AmountField({
 }) {
   const { t, i18n } = useTranslation()
   const amount = parseMoney(value)
-  // Số tiền bằng chữ đọc kèm ô nhập (trình đọc màn hình đọc cả câu này)
   const describedBy = [
     amount > 0 ? `${id}-words` : undefined,
     error ? `${id}-error` : hint ? `${id}-hint` : undefined,

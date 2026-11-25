@@ -11,8 +11,7 @@ import type { MarginPackage, PackageCode } from '../../lib/packages'
 import { PackageDialog } from './PackageDialog'
 import { usePackageActions } from './usePackageActions'
 
-// Khối Gói vay trong Tổng quan: 3 ô so nhanh bằng lãi suất và tiền lãi khi vay 100 triệu × 30 ngày.
-// Bấm ô mở popup chi tiết, đăng ký / hủy gói ngay trong popup.
+
 export function PackageTiles({
   packages,
   stocks,

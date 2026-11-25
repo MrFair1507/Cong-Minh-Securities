@@ -68,7 +68,7 @@ function ScenarioRows({ scenario }: { scenario: IllustrationScenario }) {
   )
 }
 
-// Tab Minh họa khoản vay: tính ngay trên trình duyệt bằng illustrateLoan (shared/margin.ts)
+
 export function IllustrationTab({
   stocks,
   packages,

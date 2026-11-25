@@ -9,15 +9,13 @@ import { Label } from '@/shared/ui/label'
 import { Switch } from '@/shared/ui/switch'
 import { SummaryRow } from './OrderSummary'
 
-// Thông tin ký quỹ cho hộp thoại đặt lệnh (OrderSteps ghép từ useMarginSummary)
 export type OrderMargin = {
   hasAccount: boolean
   position: MarginPosition
   initialRate: number
-  pkg?: MarginPackage // gói áp dụng khi vay mua mã này
+  pkg?: MarginPackage 
 }
 
-// Công tắc "Dùng vay ký quỹ" (frame 10). Không bật được thì ghi lý do.
 export function MarginToggle({
   margin,
   loanRate,

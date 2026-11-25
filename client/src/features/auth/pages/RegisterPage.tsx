@@ -1,5 +1,4 @@
 import { useNavigate, useRouteContext, useSearch } from '@tanstack/react-router'
-import { ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -90,11 +89,6 @@ export function RegisterPage() {
         />
       )}
       {step === 'complete' && <CompleteStep userId={session?.user.id} />}
-
-      <p className="flex items-center gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="size-4 shrink-0" aria-hidden />
-        {t('kyc.simNotice')}
-      </p>
     </div>
   )
 }

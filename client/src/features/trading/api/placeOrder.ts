@@ -9,7 +9,6 @@ export type PlaceOrderInput = {
   useMargin?: boolean // vay ký quỹ phần tiền mặt còn thiếu
 }
 
-// Mã lỗi RPC place_order trả trong message (raise exception 'INSUFFICIENT_CASH')
 const ERROR_CODES = [
   'NOT_AUTHENTICATED',
   'INVALID_QUANTITY',

@@ -18,8 +18,7 @@ type PendingAction =
   | { kind: 'cancel'; pkg: MarginPackage }
   | { kind: 'conflict'; pkg: MarginPackage; target: MarginPackage }
 
-// Đăng ký / hủy gói, có hộp thoại hỏi lại; đang dùng gói loại trừ thì hỏi hủy gói đó trước.
-// Trả về hàm hỏi và hộp thoại để đặt cạnh popup chi tiết gói.
+
 export function usePackageActions(
   packages: MarginPackage[],
   activeCode: PackageCode,

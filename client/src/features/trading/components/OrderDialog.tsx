@@ -21,7 +21,7 @@ export function OrderDialog({
 }: OrderDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 sm:max-w-[520px]">
+      <DialogContent className="flex flex-col gap-0 sm:max-w-[520px]">
         <OrderSteps
           stock={stock}
           userId={userId}

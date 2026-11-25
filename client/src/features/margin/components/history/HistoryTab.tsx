@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs'
 import type { MarginCall, MarginEvent } from '../../api/margin'
 import { callColumns, eventColumns } from './historyColumns'
 
-// Tab Lịch sử: chọn giữa cảnh báo ký quỹ và lịch sử dịch vụ
 export function HistoryTab({
   calls,
   events,

@@ -14,19 +14,24 @@ import {
   SummaryBox,
   SummaryRow,
 } from './OrderSummary'
-import { StepFooter, StepHeader } from './OrderSurface'
+import {
+  StepBody,
+  StepFooter,
+  StepHeader,
+  stepClass,
+  useOrderSurface,
+} from './OrderSurface'
 
 type OrderConfirmProps = {
   stock: BoardStock
   side: OrderSide
   quantity: number
   avgCost?: number
-  margin?: OrderMargin // có khi người dùng bật vay ký quỹ
+  margin?: OrderMargin 
   onBack: () => void
   onDone: () => void
 }
 
-// Bước 2 (frame 11): tóm tắt lệnh, bấm xác nhận mới gọi RPC place_order
 export function OrderConfirm({
   stock,
   side,
@@ -37,6 +42,7 @@ export function OrderConfirm({
   onDone,
 }: OrderConfirmProps) {
   const { t } = useTranslation('trading')
+  const surface = useOrderSurface()
   const placeOrder = usePlaceOrder()
   const sideText = t(`side.${side}`)
   const preview = margin
@@ -70,54 +76,56 @@ export function OrderConfirm({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={stepClass(surface)}>
       <StepHeader
         title={t(`confirm.title${side}`)}
         description={t('confirm.description')}
       />
 
-      <SummaryBox>
-        <SummaryRow
-          label={t('confirm.symbol')}
-          value={`${stock.symbol} · ${stock.exchanges.code}`}
-          strong
-        />
-        <SummaryRow
-          label={t('confirm.order')}
-          value={t('confirm.orderValue', { side: sideText })}
-          strong
-          className={SIDE_STYLE[side].text}
-        />
-        <SummaryRow
-          label={t('confirm.quantity')}
-          value={t('confirm.quantityValue', {
-            quantity: formatVolume(quantity),
-          })}
-        />
-        <SummaryRow
-          label={t('confirm.price')}
-          value={formatPrice(stock.price)}
-        />
-        <div className="my-1 border-t" />
-        <OrderCostRows
-          side={side}
-          price={stock.price}
-          quantity={quantity}
-          avgCost={avgCost}
-        />
-        {margin && preview && (
-          <MarginOrderRows
-            preview={preview}
-            pkg={margin.pkg}
-            initialRate={margin.initialRate}
+      <StepBody>
+        <SummaryBox>
+          <SummaryRow
+            label={t('confirm.symbol')}
+            value={`${stock.symbol} · ${stock.exchanges.code}`}
+            strong
           />
-        )}
-      </SummaryBox>
+          <SummaryRow
+            label={t('confirm.order')}
+            value={t('confirm.orderValue', { side: sideText })}
+            strong
+            className={SIDE_STYLE[side].text}
+          />
+          <SummaryRow
+            label={t('confirm.quantity')}
+            value={t('confirm.quantityValue', {
+              quantity: formatVolume(quantity),
+            })}
+          />
+          <SummaryRow
+            label={t('confirm.price')}
+            value={formatPrice(stock.price)}
+          />
+          <div className="my-1 border-t" />
+          <OrderCostRows
+            side={side}
+            price={stock.price}
+            quantity={quantity}
+            avgCost={avgCost}
+          />
+          {margin && preview && (
+            <MarginOrderRows
+              preview={preview}
+              pkg={margin.pkg}
+              initialRate={margin.initialRate}
+            />
+          )}
+        </SummaryBox>
 
-      <p className="flex gap-2 rounded-lg bg-warning-bg p-3 text-xs leading-5 text-warning">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-        {t('confirm.note')}
-      </p>
+        <p className="flex gap-2 rounded-lg bg-warning-bg p-3 text-xs leading-5 text-warning">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+          {t('confirm.note')}
+        </p>
+      </StepBody>
 
       <StepFooter>
         <Button
