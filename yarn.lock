@@ -3414,6 +3414,7 @@ __metadata:
     cmdk: "npm:^1.1.1"
     cn: "npm:^0.5.2"
     i18next: "npm:^27.0.1"
+    jsqr: "npm:1.4.0"
     lightweight-charts: "npm:^5.3.0"
     lucide-react: "npm:^1.70.0"
     next-themes: "npm:^0.4.6"
@@ -4521,6 +4522,13 @@ __metadata:
     graceful-fs:
       optional: true
   checksum: 10c0/e1abf000ecee9942d4d028a8e02dc752617face227d72afd1cfb2187e2433079e625bf82b807a313689db71b6472c6b2b389a2340d2798737b1199a39631c28a
+  languageName: node
+  linkType: hard
+
+"jsqr@npm:1.4.0":
+  version: 1.4.0
+  resolution: "jsqr@npm:1.4.0"
+  checksum: 10c0/69fbfe4c866a04c97b377901a166544a583bfc76b838c275efa9af058d64e5612267079b1e96ea7b6434385803571b1c6a97a43c85f4373e8afa4f4034fc916c
   languageName: node
   linkType: hard
 

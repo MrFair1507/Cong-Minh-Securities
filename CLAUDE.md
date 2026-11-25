@@ -160,6 +160,14 @@
   - Còn: `/market` tràn ngang ở 1280 (bảng giá 1351px trong khung 1248px). Màn đăng nhập/đăng ký tràn ở 1024 (dưới mức desktop, bỏ qua).
   - `yarn check` báo lỗi format ở `marginActions.ts`, `MarginCallWatcher.tsx`, `useMarginSummary.ts` (có từ trước, chưa sửa).
 - Sửa màn đăng nhập (23/11, chưa commit): cột thương hiệu 520px lệch nền một bậc (DESIGN.md); form đăng nhập dùng `validationLogic: revalidateLogic()` + `validators: { onDynamic }` (chưa bấm thì không báo lỗi, bấm rồi kiểm lại mỗi lần gõ; mẫu nên dùng cho form khác thay `onBlur`), email trống báo `errors.emailRequired`, ô email `autoFocus`. Đã kiểm bằng Playwright: 1024 hết cuộn ngang, sáng/tối.
+- Làm lại bước xác thực giấy tờ (25/11, chưa commit; kế hoạch `~/.claude/plans/pasted-content-id-b7bc-a-th-stateful-volcano-of-de859676-f895-41b3-921f-6050694b2e2d.md`). Minh chốt: tải ảnh thẻ mẫu 2 mặt, bỏ nút "Dùng giấy tờ mẫu". Không migration.
+  - Ảnh: 5 bộ ở `doc/the-mau/` (không lên GitHub), mỗi bộ chỉ mở được 1 tài khoản (`id_number` unique), họ tên bước 1 phải gõ đúng dấu như trên thẻ. Tạo thêm bộ bằng `doc/the-mau/tao-the.mjs` (chạy ngoài repo, xem chú thích đầu file).
+  - Mỗi mặt có QR `CMS-MOCK|ID|FRONT|{json}` / `CMS-MOCK|ID|BACK|{json}`. `lib/readQr.ts` (gói `jsqr`, đọc trên trình duyệt), `lib/idCard.ts` hàm thuần `parseFront`, `parseBack`, `checkIdCard`, `normalizeName` (để viết Vitest). 9 mã lỗi ở i18n `auth.kyc.cardErrors`.
+  - `DocumentStep` quét thật 3 bước, lỗi từng ảnh hiện dưới ô ảnh. Ảnh giữ ở `RegisterPage` (Quay lại không mất). `ConfirmStep` khóa hết, chỉ còn ô đồng ý. `signUp` ghi họ tên theo thẻ. Xóa `SampleIdCard`, các hàm sinh dữ liệu trong `mockIdentity.ts`.
+  - `authErrorKey`: auth-js bỏ `error.code` của phản hồi 5xx, nên lỗi DB khi đăng ký (số giấy tờ đã dùng) nhận diện bằng message.
+  - Giới hạn: QR không có chữ ký số; lớp chặn cuối là DB (đầu 999, unique).
+  - Đã kiểm bằng Playwright (1366×650, sáng/tối, VI/EN). Tài khoản test `test.kyc.1795577089788@example.com` / `Test@12345`. Chưa thử ảnh chụp bằng điện thoại.
+  - Còn: `AccountStep` (bước 1) vẫn dùng `onBlur`, cú bấm Tiếp tục đầu tiên có thể trượt (đã gặp lại khi kiểm).
 - Tiếp theo: `db:types` (Minh) → chạy Playwright luồng demo (nạp tiền → mở TK ký quỹ → mua có vay → `--trend=down --session=60` → cảnh báo → trả nợ → thu nợ cuối phiên) → tuần 3 (Vitest, báo cáo).
 - Yarn 1 global đã gỡ; corepack đã bật không cần admin bằng `corepack enable --install-directory "%APPDATA%\npm" yarn`. Gõ `yarn` trực tiếp là ra 4.18.1 (terminal mở trước khi sửa thì mở lại).
 - Script gốc: `dev` (concurrently client + server), `build`, `check`, `check:fix`, `db:push`, `db:types`.

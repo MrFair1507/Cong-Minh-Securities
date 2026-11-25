@@ -16,7 +16,7 @@ export async function signUp(account: AccountValues, identity: MockIdentity) {
     password: account.password,
     options: {
       data: {
-        full_name: account.fullName.trim(),
+        full_name: identity.fullName, // tên trên thẻ, đã đối chiếu với tên nhập ở bước 1
         phone: account.phone,
         id_number: identity.idNumber,
         date_of_birth: identity.dateOfBirth,
@@ -36,10 +36,13 @@ const ERROR_KEYS = {
   weak_password: 'errors.weakPassword',
   same_password: 'errors.samePassword',
   over_request_rate_limit: 'errors.rateLimit',
-  // Trigger lỗi (vd. constraint chặn số giấy tờ) → Supabase trả "Database error saving new user"
-  unexpected_failure: 'errors.signupRejected',
 } as const
 
+// Trigger lỗi (số giấy tờ đã dùng hoặc không có đầu 999) thì Supabase trả 500 kèm câu này.
+// Phải so message vì auth-js bỏ error.code của mọi phản hồi 5xx.
+const SIGNUP_DB_ERROR = 'Database error saving new user'
+
 export function authErrorKey(error: AuthError) {
+  if (error.message.includes(SIGNUP_DB_ERROR)) return 'errors.signupRejected'
   return ERROR_KEYS[error.code as keyof typeof ERROR_KEYS] ?? 'errors.unknown'
 }

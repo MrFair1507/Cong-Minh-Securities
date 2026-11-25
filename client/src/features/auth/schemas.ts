@@ -1,6 +1,5 @@
 import type { TFunction } from 'i18next'
 import { z } from 'zod'
-import { ageOn, GENDERS } from './lib/mockIdentity'
 
 // Nhận t để thông báo lỗi đi qua i18n (đổi ngôn ngữ thì lỗi đổi theo)
 export const loginSchema = (t: TFunction<'auth'>) =>
@@ -29,13 +28,9 @@ export const accountSchema = (t: TFunction<'auth'>) =>
       path: ['confirmPassword'], // lỗi hiện dưới ô Xác nhận mật khẩu
     })
 
-// Đăng ký bước 3: chỉ ngày sinh, giới tính sửa được. Số giấy tờ, ngày cấp bị khóa nên không nằm trong form.
+// Đăng ký bước 3: thông tin đọc từ thẻ đều khóa, form chỉ còn ô đồng ý
 export const confirmSchema = (t: TFunction<'auth'>) =>
   z.object({
-    dateOfBirth: z.iso
-      .date(t('kyc.errors.dateInvalid'))
-      .refine((value) => ageOn(value) >= 18, t('kyc.errors.underage')),
-    gender: z.enum(GENDERS),
     accepted: z.literal(true, t('kyc.errors.mustAccept')),
   })
 

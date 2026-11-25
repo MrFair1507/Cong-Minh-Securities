@@ -11,7 +11,8 @@ import {
   type RegisterStep,
   RegisterStepper,
 } from '../components/register/RegisterStepper'
-import { generateMockIdentity, type MockIdentity } from '../lib/mockIdentity'
+import type { CardImages } from '../lib/idCard'
+import type { MockIdentity } from '../lib/mockIdentity'
 import type { AccountValues } from '../schemas'
 
 // Wizard 4 bước. State để trong trang (useState): tải lại trang thì về bước 1,
@@ -27,6 +28,8 @@ export function RegisterPage() {
     session && completed ? 'complete' : 'account',
   )
   const [account, setAccount] = useState<AccountValues>()
+  // Giữ ảnh ở đây để bấm Quay lại không mất
+  const [images, setImages] = useState<CardImages>({})
   const [identity, setIdentity] = useState<MockIdentity>()
   const [emailError, setEmailError] = useState<string>()
 
@@ -36,18 +39,17 @@ export function RegisterPage() {
     setStep('document')
   }
 
-  function handleVerified() {
-    if (!account) return
-    setIdentity(generateMockIdentity(account.fullName))
+  function handleVerified(verified: MockIdentity) {
+    setIdentity(verified)
     setStep('confirm')
   }
 
-  async function handleConfirm(finalIdentity: MockIdentity) {
-    if (!account) return
+  async function handleConfirm() {
+    if (!account || !identity) return
     // Gắn cờ trước: signUp phát SIGNED_IN → router.invalidate() chạy lại beforeLoad.
     // Có completed thì guard không đá sang /market trước khi kịp hiện bước 4.
     await navigate({ search: { completed: true }, replace: true })
-    const error = await signUp(account, finalIdentity)
+    const error = await signUp(account, identity)
     if (!error) {
       setStep('complete')
       return
@@ -75,8 +77,11 @@ export function RegisterPage() {
           onSubmit={handleAccount}
         />
       )}
-      {step === 'document' && (
+      {step === 'document' && account && (
         <DocumentStep
+          fullName={account.fullName}
+          images={images}
+          onImagesChange={setImages}
           onBack={() => setStep('account')}
           onVerified={handleVerified}
         />

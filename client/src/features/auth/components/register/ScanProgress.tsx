@@ -1,24 +1,17 @@
 import { cn } from 'cn'
-import { Check, Circle, LoaderCircle } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Check, Circle, LoaderCircle, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-const SCAN_STEPS = ['quality', 'extract', 'match'] as const
-const STEP_MS = 600
+// Ba việc thật mà DocumentStep làm: đọc QR từ ảnh → tách dữ liệu → đối chiếu
+export const SCAN_STEPS = ['read', 'extract', 'match'] as const
 
-// "Quét" chỉ là bộ đếm thời gian (~2 giây), không có OCR. Xong 3 dòng thì gọi onDone.
-export function ScanProgress({ onDone }: { onDone: () => void }) {
+type ScanProgressProps = {
+  current: number // dòng đang chạy; bằng SCAN_STEPS.length là xong hết
+  failed: boolean // dừng ở dòng current vì lỗi
+}
+
+export function ScanProgress({ current, failed }: ScanProgressProps) {
   const { t } = useTranslation('auth')
-  const [doneCount, setDoneCount] = useState(0)
-
-  useEffect(() => {
-    if (doneCount === SCAN_STEPS.length) {
-      const id = setTimeout(onDone, 300)
-      return () => clearTimeout(id)
-    }
-    const id = setTimeout(() => setDoneCount((n) => n + 1), STEP_MS)
-    return () => clearTimeout(id)
-  }, [doneCount, onDone])
 
   return (
     <ul
@@ -26,15 +19,17 @@ export function ScanProgress({ onDone }: { onDone: () => void }) {
       className="flex flex-col gap-2 rounded-lg border p-3 text-sm"
     >
       {SCAN_STEPS.map((step, index) => {
-        const done = index < doneCount
-        const running = index === doneCount
-        const Icon = done ? Check : running ? LoaderCircle : Circle
+        const done = index < current
+        const running = index === current && !failed
+        const error = index === current && failed
+        const Icon = done ? Check : error ? X : running ? LoaderCircle : Circle
         return (
           <li
             key={step}
             className={cn(
               'flex items-center gap-2',
-              !done && !running && 'text-muted-foreground',
+              index > current && 'text-muted-foreground',
+              error && 'text-destructive',
             )}
           >
             <Icon
